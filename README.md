@@ -1,6 +1,6 @@
-# Jitsi Meet Electron
+# Freifunk Meet Electron
 
-Desktop application for [Jitsi Meet] built with [Electron].
+Desktop application for [FreifunkMeet] built with [Electron].
 
 ![](screenshot.png)
 
@@ -20,20 +20,21 @@ Download our latest release and you're off to the races!
 
 | Windows | macOS | GNU/Linux (AppImage) | GNU/Linux (Deb) |
 | -- | -- | -- | -- |
-| [Download](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet.exe) | [Download](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet.dmg) | [x64_64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-x86_64.AppImage) [arm64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-arm64.AppImage) | [x86_64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-amd64.deb) [arm64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-arm64.deb) |
+| [Download](https://github.com/freifunkMUC/jitsi-meet-electron/releases/latest/download/ffmuc-meet.exe) | [Download](https://github.com/freifunkMUC/jitsi-meet-electron/releases/latest/download/ffmuc-meet.dmg) | [x64_64](https://github.com/freifunkMUC/jitsi-meet-electron/releases/latest/download/ffmuc-meet-x86_64.AppImage) [arm64](https://github.com/freifunkMUC/jitsi-meet-electron/releases/latest/download/ffmuc-meet-arm64.AppImage) | [x86_64](https://github.com/freifunkMUC/jitsi-meet-electron/releases/latest/download/ffmuc-meet-amd64.deb) [arm64](https://github.com/freifunkMUC/jitsi-meet-electron/releases/latest/download/ffmuc-meet-arm64.deb) |
 
-### Third-Party builds
+### WinGet (Windows)
+For *Windows* user, you can install the application using the following command in PowerShell:
 
-[<img src="https://dl.flathub.org/assets/badges/flathub-badge-en.svg"
-     alt="Download On Flathub"
-     height="60">](https://flathub.org/apps/details/org.jitsi.jitsi-meet)
+```
+winget install --id freifunkMUC.FreifunkMeet
+```
 
-### Homebrew
+### Homebrew (macOS)
 
 For *macOS* users, you can install the application using the following command:
 
 ```
-brew install --cask jitsi-meet
+brew install --cask freifunkMUC/freifunkmeet/freifunk-meet
 ```
 
 ## Development
@@ -44,7 +45,7 @@ If you want to hack on this project, here is how you do it.
 
 #### Installing dependencies
 
-Install Node.js 22 first (or if you use [nvm](https://github.com/nvm-sh/nvm), switch to it by running `nvm use`).
+Install Node.js 20 first (or if you use [nvm](https://github.com/nvm-sh/nvm), switch to Node.js 20 by running `nvm use`).
 
 <details><summary>Extra dependencies for Windows</summary>
 
@@ -190,9 +191,9 @@ Apache License 2.0. See the [LICENSE] file.
 Jitsi is built by a large community of developers. If you want to participate,
 please join the [community forum].
 
-[Jitsi Meet]: https://github.com/jitsi/jitsi-meet
+[FreifunkMeet]: https://github.com/FreifunkMUC/jitsi-meet
 [Electron]: https://electronjs.org/
-[latest release]: https://github.com/jitsi/jitsi-meet-electron/releases/latest
+[latest release]: https://github.com/FreifunkMUC/jitsi-meet-electron/releases/latest
 [`jitsi-meet-electron-sdk`]: https://github.com/jitsi/jitsi-meet-electron-sdk
 [`jitsi-meet-electron-sdk` `README`]: https://github.com/jitsi/jitsi-meet-electron-sdk/blob/master/README.md
 [community forum]: https://community.jitsi.org/
