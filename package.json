@@ -1,6 +1,6 @@
 {
   "name": "ffmuc-meet",
-  "version": "2025.10.0",
+  "version": "2025.10.1",
   "description": "Electron application for Freifunk Meet",
   "main": "./build/main.js",
   "productName": "FreifunkMeet",
