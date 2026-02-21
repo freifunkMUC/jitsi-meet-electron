@@ -1,6 +1,6 @@
 {
   "name": "ffmuc-meet",
-  "version": "2025.10.1",
+  "version": "2026.1.1",
   "description": "Electron application for Freifunk Meet",
   "main": "./build/main.js",
   "productName": "FreifunkMeet",
@@ -153,7 +153,7 @@
     "babel-loader": "^8.2.3",
     "concurrently": "5.1.0",
     "css-loader": "^6.7.1",
-    "electron": "39.2.7",
+    "electron": "39.5.1",
     "electron-builder": "26.0.12",
     "electron-context-menu": "^2.5.0",
     "electron-is-dev": "^1.2.0",
@@ -183,7 +183,7 @@
     "source-map-support": "^0.5.19",
     "style-loader": "^3.3.1",
     "styled-components": "^3.4.10",
-    "webpack": "^5.94.0",
+    "webpack": "^5.105.0",
     "webpack-cli": "^4.9.2"
   }
 }
