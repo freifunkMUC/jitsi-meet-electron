@@ -140,7 +140,7 @@
     "@atlaskit/spinner": "^9.0.13",
     "@atlaskit/theme": "^7.0.5",
     "@atlaskit/toggle": "^5.0.15",
-    "@babel/core": "^7.17.8",
+    "@babel/core": "^7.29.6",
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/plugin-proposal-export-namespace-from": "^7.16.7",
     "@babel/preset-env": "^7.16.11",
