@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 
 export default styled.div`
-    background: #3e3e3e;
+    background: #dc0067;
     border-radius: 0.5em;
     color: white;
     display: grid;
