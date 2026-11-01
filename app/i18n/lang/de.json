@@ -182,6 +182,12 @@
 			"unknown": "Dieser Link öffnet keinen Raum. Prüfe, ob du den ganzen Link kopiert hast.",
 			"invalid": "Dieser Link öffnet keinen Raum. Prüfe, ob du den ganzen Link kopiert hast.",
 			"forbidden": "Mit diesem Link kannst du nicht in dieser Rolle beitreten."
-		}
+		},
+		"onServer": "Auf {{server}}"
+	},
+	"recent": {
+		"title": "Letzte Konferenzen",
+		"lastJoined": "Zuletzt am {{time}}",
+		"remove": "{{room}} aus der Liste entfernen"
 	}
 }

@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Dispatch, compose } from 'redux';
 import styled from 'styled-components';
 
-import type { IState } from '../../../types';
+import type { IConference, IState } from '../../../types';
 import config from '../../config';
 import { Navbar } from '../../navbar';
 import { RecentList, addRecentListEntry } from '../../recent-list';
@@ -18,7 +18,7 @@ import { CardTitle } from '../../shared/components/Card';
 import FieldText from '../../shared/components/FieldText';
 import Page from '../../shared/components/Page';
 import { createConferenceObjectFromURL } from '../../utils';
-import { describeWelcomeInput, serverHost } from '../functions';
+import { describeWelcomeInput, lookupWelcomeInput, needsReserveLookup, sameServer, serverHost } from '../functions';
 import { Body, Form, Header, Wrapper } from '../styled';
 
 
@@ -177,14 +177,21 @@ class Welcome extends Component<IProps, IWelcomeState> {
      */
     _inspect(url: string) {
         clearTimeout(this._inspectTimeout);
-        if (!parseReserveLink(url)) {
+        const serverURL = this.props._serverURL || config.defaultServerURL;
+
+        // Room names and meeting links need no request to the reserve service.
+        if (!needsReserveLookup(url, serverURL)) {
             this.setState({ linkInfo: undefined, linkLoading: false, linkSaved: false });
 
             return;
         }
         this.setState({ linkInfo: undefined, linkLoading: true, linkSaved: false });
         this._inspectTimeout = setTimeout(async () => {
-            const result = await inspectReserveLink(url);
+            const { info: result } = await lookupWelcomeInput(url, serverURL, inspectReserveLink);
+
+            if (!result) {
+                return;
+            }
 
             // Ignore old answers.
             if (this.state.url !== url) {
@@ -361,9 +368,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
      */
     _renderBody() {
         return (
-            <Body>
-                <RecentList />
-            </Body>
+            <Body />
         );
     }
 
@@ -383,12 +388,10 @@ class Welcome extends Component<IProps, IWelcomeState> {
 
         if (reserveJoining) {
             goLabel = t('reserve.joining');
-        } else if (input.type === 'empty') {
+        } else if (!this.state.url.trim()) {
             goLabel = t('welcome.startNew');
         } else if (this.state.linkInfo) {
             goLabel = t(`welcome.joinAs.${this.state.linkInfo.role}`);
-        } else if (input.type === 'viewer') {
-            goLabel = t('welcome.joinAs.viewer');
         }
 
         return (
@@ -407,7 +410,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
                     <HelperText>
                         { t('welcome.helper', { server: serverHost(serverURL) }) }
                     </HelperText>
-                    { this._renderPreview(input.type === 'viewer' ? input.conference.room : undefined) }
+                    { this._renderPreview(input.type === 'viewer' || input.type === 'name' ? input.conference : undefined) }
                     <MainGoButton
                         appearance = 'primary'
                         disabled = { reserveJoining || this.state.linkLoading }
@@ -417,6 +420,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
                     </MainGoButton>
                 </Form>
                 <ReservedRoomsCard />
+                <RecentList />
             </Header>
         );
     }
@@ -424,10 +428,10 @@ class Welcome extends Component<IProps, IWelcomeState> {
     /**
      * Renders what the field value opens: the room and the role, or an error.
      *
-     * @param {string} viewerRoom - Room of a viewer link.
+     * @param {IConference} conference - A normal room from a room name or meeting link.
      * @returns {ReactElement|null}
      */
-    _renderPreview(viewerRoom?: string) {
+    _renderPreview(conference?: IConference) {
         const { t } = this.props;
         const { linkInfo, linkLoading, linkSaved, reserveError } = this.state;
 
@@ -445,7 +449,22 @@ class Welcome extends Component<IProps, IWelcomeState> {
             return <Preview kind = 'ok'>{ t('welcome.checking') }</Preview>;
         }
 
-        const room = linkInfo?.room ?? viewerRoom;
+        if (!linkInfo && conference) {
+            const serverURL = this.props._serverURL || config.defaultServerURL;
+            const other = !sameServer(conference.serverURL, serverURL);
+
+            // A normal room has no roles, so it shows no badge.
+            return (
+                <Preview
+                    kind = 'ok'
+                    role = 'status'>
+                    <PreviewRoom title = { conference.room }>{ t('welcome.room', { room: conference.room }) }</PreviewRoom>
+                    { other && <PreviewHint>{ t('welcome.onServer', { server: serverHost(conference.serverURL) }) }</PreviewHint> }
+                </Preview>
+            );
+        }
+
+        const room = linkInfo?.room;
 
         if (!room) {
             return null;

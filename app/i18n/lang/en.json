@@ -182,6 +182,12 @@
 			"unknown": "This link does not open a room. Make sure that you copied the full link.",
 			"invalid": "This link does not open a room. Make sure that you copied the full link.",
 			"forbidden": "This link cannot join with this role."
-		}
+		},
+		"onServer": "On {{server}}"
+	},
+	"recent": {
+		"title": "Recent meetings",
+		"lastJoined": "Last joined {{time}}",
+		"remove": "Remove {{room}} from the list"
 	}
 }

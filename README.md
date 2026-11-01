@@ -17,6 +17,7 @@ Desktop application for [FreifunkMeet] built with [Electron].
   - `ffmuc-meet://jitsi.example.com/myroom` opens `myroom` on `jitsi.example.com`.
   - `ffmuc-meet://meet.ffmuc.net/reserve/h/<secret>` opens a reserved room as host.
 - Reserved rooms (see [Reserved rooms](#reserved-rooms))
+- Start page with three cards: **Join a meeting**, **Reserved rooms** and **Recent meetings**. Type a room name or paste a link. The app shows the room before you join.
 - Light and dark theme. The theme follows the operating system. To set it manually, open **Settings > Theme**.
 
 ## Reserved rooms

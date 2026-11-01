@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { describeWelcomeInput, serverHost } from '../functions';
+import { describeWelcomeInput, lookupWelcomeInput, needsReserveLookup, sameServer, serverHost } from '../functions';
 
 const SERVER = 'https://meet.ffmuc.net';
 const SECRET = 'AbCdEfGhIjKlMnOpQrStUv';
@@ -12,7 +12,10 @@ describe('describeWelcomeInput', () => {
     });
 
     it('is a name for a plain room name', () => {
-        assert.deepEqual(describeWelcomeInput('MyRoom', SERVER), { type: 'name' });
+        assert.deepEqual(describeWelcomeInput('MyRoom', SERVER), {
+            conference: { room: 'MyRoom', serverURL: SERVER },
+            type: 'name'
+        });
     });
 
     it('finds host, speaker and manage links', () => {
@@ -44,5 +47,54 @@ describe('serverHost', () => {
     it('returns the host of a URL', () => {
         assert.equal(serverHost('https://meet.ffmuc.net/'), 'meet.ffmuc.net');
         assert.equal(serverHost('meet.example.org'), 'meet.example.org');
+    });
+});
+
+describe('reserve lookups', () => {
+    const plain = [
+        'MyRoom',
+        'r-q6ppmw9xncrj3k',
+        `${SERVER}/MyRoom`,
+        `${SERVER}/r-q6ppmw9xncrj3k`,
+        'https://jitsi.example.com/team',
+        'jitsi.example.com/team'
+    ];
+
+    it('does not call the reserve service for room names and meeting links', async () => {
+        let calls = 0;
+        const inspect = async () => {
+            calls++;
+
+            return 'info';
+        };
+
+        for (const input of plain) {
+            assert.equal(needsReserveLookup(input, SERVER), false, input);
+            const result = await lookupWelcomeInput(input, SERVER, inspect);
+
+            assert.equal(result.info, undefined, input);
+        }
+        assert.equal(calls, 0);
+    });
+
+    it('calls the reserve service once for a host link', async () => {
+        const seen: string[] = [];
+        const link = `${SERVER}/reserve/h/${SECRET}`;
+        const result = await lookupWelcomeInput(` ${link} `, SERVER, async (l: string) => {
+            seen.push(l);
+
+            return 'info';
+        });
+
+        assert.equal(needsReserveLookup(link, SERVER), true);
+        assert.deepEqual(seen, [ link ]);
+        assert.equal(result.info, 'info');
+    });
+});
+
+describe('sameServer', () => {
+    it('compares hosts only', () => {
+        assert.equal(sameServer('https://meet.ffmuc.net', 'https://MEET.ffmuc.net/'), true);
+        assert.equal(sameServer('https://meet.ffmuc.net', 'https://jitsi.example.com'), false);
     });
 });
