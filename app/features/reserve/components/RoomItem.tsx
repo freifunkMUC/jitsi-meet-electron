@@ -9,26 +9,47 @@ import { Muted, Row, Section, Select, SmallButton } from './styled';
 import { formatDuration } from './util';
 
 const Name = styled.div`
-    font-size: 15px;
-    font-weight: 600;
+    flex: 1;
+    font-size: 16px;
+    font-weight: 700;
     word-break: break-all;
 `;
 
+const Divider = styled.hr`
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 2px 0;
+    width: 100%;
+`;
+
 const STATUS_COLORS: Record<string, string> = {
-    active: '#36b37e',
-    deleted: '#ff5630',
-    expired: '#ffab00',
-    replaced: '#ff5630',
-    unknown: '#ff5630'
+    active: 'var(--ok)',
+    deleted: 'var(--danger)',
+    expired: 'var(--warn)',
+    replaced: 'var(--danger)',
+    unknown: 'var(--danger)'
 };
 
 const Status = styled.span<{ status: string; }>`
-    color: ${p => STATUS_COLORS[p.status] ?? '#a0a0a0'};
+    align-items: center;
+    color: ${p => STATUS_COLORS[p.status] ?? 'var(--muted)'};
+    display: inline-flex;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    gap: 6px;
+
+    &::before {
+        background: currentColor;
+        border-radius: 50%;
+        content: '';
+        height: 8px;
+        width: 8px;
+    }
 `;
 
-const LINK_KINDS: RoomLinkKind[] = [ 'host', 'speaker', 'viewer', 'manage', 'all' ];
+// Links people share most come first.
+const SHARE_KINDS: RoomLinkKind[] = [ 'speaker', 'viewer' ];
+const COPY_KINDS: RoomLinkKind[] = [ 'host', 'manage', 'all' ];
 
 interface IProps {
     busy: boolean;
@@ -93,7 +114,8 @@ export default function RoomItem(props: IProps) {
                 <SmallButton
                     aria-expanded = { props.extendOpen }
                     disabled = { busy || !active || enabled.length === 0 }
-                    onClick = { () => props.onToggleExtend(room.room) }>
+                    onClick = { () => props.onToggleExtend(room.room) }
+                    title = { t('reserve.actionHints.extend') }>
                     { t('reserve.extend') }
                 </SmallButton>
             </Row>
@@ -124,8 +146,21 @@ export default function RoomItem(props: IProps) {
             ) }
             { active && (
                 <Row>
+                    { SHARE_KINDS.map(kind => (
+                        <SmallButton
+                            disabled = { busy }
+                            key = { kind }
+                            onClick = { () => props.onCopy(room.room, kind) }
+                            title = { t(`reserve.copyHint.${kind}`) }>
+                            { t(`reserve.share.${kind}`) }
+                        </SmallButton>
+                    )) }
+                </Row>
+            ) }
+            { active && (
+                <Row>
                     <Muted>{ t('reserve.copy') }</Muted>
-                    { LINK_KINDS.map(kind => (
+                    { COPY_KINDS.map(kind => (
                         <SmallButton
                             disabled = { busy }
                             key = { kind }
@@ -136,11 +171,13 @@ export default function RoomItem(props: IProps) {
                     )) }
                 </Row>
             ) }
+            <Divider />
             <Row>
                 { active && (
                     <SmallButton
                         disabled = { busy }
-                        onClick = { () => props.onRotate(room.room) }>
+                        onClick = { () => props.onRotate(room.room) }
+                        title = { t('reserve.actionHints.rotate') }>
                         { t('reserve.rotate') }
                     </SmallButton>
                 ) }
@@ -148,7 +185,8 @@ export default function RoomItem(props: IProps) {
                     <SmallButton
                         danger = { true }
                         disabled = { busy }
-                        onClick = { () => props.onDelete(room.room) }>
+                        onClick = { () => props.onDelete(room.room) }
+                        title = { t('reserve.actionHints.delete') }>
                         { t('reserve.delete') }
                     </SmallButton>
                 ) }

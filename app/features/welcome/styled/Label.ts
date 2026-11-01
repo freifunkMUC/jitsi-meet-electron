@@ -2,8 +2,10 @@
 import styled from 'styled-components';
 
 export default styled.span`
-    color: white;
+    color: var(--text);
     display: block;
-    font-weight: bold;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
     margin: 0;
 `;

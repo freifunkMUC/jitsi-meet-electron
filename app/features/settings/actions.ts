@@ -1,11 +1,13 @@
 
+import type { ThemeSource } from '../../types';
 import { normalizeServerURL } from '../utils';
 
 import {
     SET_ALWAYS_ON_TOP_WINDOW_ENABLED,
     SET_DISABLE_AGC,
     SET_SERVER_TIMEOUT,
-    SET_SERVER_URL
+    SET_SERVER_URL,
+    SET_THEME
 } from './actionTypes';
 
 
@@ -70,5 +72,21 @@ export function setWindowAlwaysOnTop(alwaysOnTopWindowEnabled: boolean) {
     return {
         type: SET_ALWAYS_ON_TOP_WINDOW_ENABLED,
         alwaysOnTopWindowEnabled
+    };
+}
+
+/**
+ * Set the colour theme.
+ *
+ * @param {ThemeSource} theme - System, light or dark.
+ * @returns {{
+ *     type: SET_THEME,
+ *     theme
+ * }}
+ */
+export function setTheme(theme: ThemeSource) {
+    return {
+        type: SET_THEME,
+        theme
     };
 }

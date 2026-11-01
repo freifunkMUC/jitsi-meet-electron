@@ -28,18 +28,18 @@ const getWidth = (props: { shouldFitContainer?: boolean; }) => {
 
 const getBorderColor = (props: { isInvalid?: boolean; }) => {
     if (props.isInvalid) {
-        return '#ff5630';
+        return 'var(--danger)';
     }
 
-    return '#3e3e3e';
+    return 'var(--input-line)';
 };
 
 const getFocusBorderColor = (props: { isInvalid?: boolean; }) => {
     if (props.isInvalid) {
-        return '#ff5630';
+        return 'var(--danger)';
     }
 
-    return '#dddddd';
+    return 'var(--focus-ring)';
 };
 
 const Wrapper = styled.div<{ shouldFitContainer?: boolean; }>`
@@ -49,21 +49,22 @@ const Wrapper = styled.div<{ shouldFitContainer?: boolean; }>`
 `;
 
 const StyledLabel = styled.label`
-    color: #c6c6c6;
+    color: var(--muted);
     font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
     text-transform: uppercase;
 `;
 
 const StyledInput = styled.input<{ isInvalid?: boolean; }>`
-    background: #3e3e3e;
-    border: 2px solid ${getBorderColor};
-    border-radius: 4px;
-    color: #f4f5f7;
+    background: var(--input-bg);
+    border: 1px solid ${getBorderColor};
+    border-radius: var(--radius-sm);
+    color: var(--text);
     font-size: 14px;
     outline: none;
-    padding: 8px 10px;
+    padding: 10px 12px;
     transition: border-color 0.15s;
     width: 100%;
 
@@ -72,12 +73,12 @@ const StyledInput = styled.input<{ isInvalid?: boolean; }>`
     }
 
     &::placeholder {
-        color: #cdcdcd;
+        color: var(--muted);
     }
 `;
 
 const ErrorMessage = styled.span`
-    color: #ff5630;
+    color: var(--danger);
     font-size: 12px;
     margin-top: 4px;
 `;

@@ -12,12 +12,13 @@ import Logo from './Logo';
 
 
 const NavBar = styled.nav`
-    background: #1a1a1a;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--line);
     display: flex;
     flex-direction: column;
     height: 100vh;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 12px 0;
     width: 64px;
 `;
 
@@ -25,21 +26,21 @@ const NavSection = styled.div`
     align-items: center;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 `;
 
 const NavItem = styled.div`
     align-items: center;
-    border-radius: 8px;
-    color: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-sm);
+    color: var(--icon);
     cursor: pointer;
     display: flex;
     justify-content: center;
     padding: 8px;
 
     &:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
+        background: var(--hover);
+        color: var(--accent-text);
     }
 `;
 

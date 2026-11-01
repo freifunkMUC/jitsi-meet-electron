@@ -12,6 +12,7 @@ export const RESERVE_INVOKE_CHANNELS = {
     durations: 'reserve-durations',
     extend: 'reserve-rooms-extend',
     import: 'reserve-rooms-import',
+    inspect: 'reserve-inspect',
     join: 'reserve-join',
     joinRoom: 'reserve-rooms-join',
     list: 'reserve-rooms-list',
@@ -43,6 +44,21 @@ export interface IReserveConference {
     jwt: string;
     room: string;
     serverURL: string;
+}
+
+/**
+ * What a pasted reserve link opens. Has no secrets.
+ */
+export interface IReserveLinkInfo {
+    kind: 'host' | 'manage' | 'speaker';
+    role: 'host' | 'speaker';
+    room: string;
+    roomExpires?: string;
+
+    /**
+     * True if the room of a host or manage link is in "My rooms".
+     */
+    saved: boolean;
 }
 
 export type RoomStatus = 'active' | 'deleted' | 'expired' | 'replaced' | 'unknown';

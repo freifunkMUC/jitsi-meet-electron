@@ -7,6 +7,7 @@ import config from '../../config';
 import { DEFAULT_BASE_PATH, JoinCache, ReserveClient, ReserveError, parseReserveLink } from '../client';
 import {
     IReserveConference,
+    IReserveLinkInfo,
     RESERVE_EVENTS,
     RESERVE_INVOKE_CHANNELS,
     ReserveIpcResult,
@@ -79,6 +80,34 @@ export async function resolveReserveJoin(input: string): Promise<IReserveConfere
         jwt: info.jwt,
         room: info.room,
         serverURL: info.serverURL
+    };
+}
+
+/**
+ * Tells what a host, speaker or manage link opens. This gets the join token
+ * already: it is kept in memory, so the join after the preview sends no second
+ * request.
+ *
+ * @param {string} input - The link.
+ * @returns {Promise<IReserveLinkInfo>}
+ */
+export async function inspectReserveLink(input: string): Promise<IReserveLinkInfo> {
+    const link = parseReserveLink(input);
+
+    if (!link) {
+        throw new ReserveError('invalid', 0, 'not a reserve link');
+    }
+
+    const info = await createReserveClient(link.baseURL).resolveJoin(link);
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    const service = await getRoomsService();
+
+    return {
+        kind: link.kind,
+        role: info.role,
+        room: info.room,
+        roomExpires: info.roomExpires,
+        saved: link.kind !== 'speaker' && !link.legacy && service.hasHostSecret(link.baseURL, link.key)
     };
 }
 
@@ -272,6 +301,7 @@ export function setupReserveMain({ isTrustedSender, parentWindow, showWindow }: 
         return room ?? null;
     });
     handle(RESERVE_INVOKE_CHANNELS.join, async (_s, input: unknown) => resolveReserveJoin(String(input ?? '')));
+    handle(RESERVE_INVOKE_CHANNELS.inspect, async (_s, input: unknown) => inspectReserveLink(String(input ?? '')));
     handle(RESERVE_INVOKE_CHANNELS.list, async () => (await getRoomsService()).list());
     handle(RESERVE_INVOKE_CHANNELS.refresh, async (_s, force: unknown) =>
         (await getRoomsService()).refresh(force === true));

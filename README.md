@@ -17,13 +17,22 @@ Desktop application for [FreifunkMeet] built with [Electron].
   - `ffmuc-meet://jitsi.example.com/myroom` opens `myroom` on `jitsi.example.com`.
   - `ffmuc-meet://meet.ffmuc.net/reserve/h/<secret>` opens a reserved room as host.
 - Reserved rooms (see [Reserved rooms](#reserved-rooms))
+- Light and dark theme. The theme follows the operating system. To set it manually, open **Settings > Theme**.
 
 ## Reserved rooms
 
 You can reserve a room on `meet.ffmuc.net`. A reserved room has a fixed name and an expiry date.
 
-- **Join:** Paste a host link (`/reserve/h/…`), a speaker link (`/reserve/s/…`) or a manage link in the start field. The app gets a token and opens the room with your role.
-- **My rooms:** Click the calendar icon. You can:
+A reserved room has three access levels:
+
+- **Host:** For you and co-hosts. The host moderates the room.
+- **Speaker:** For people who talk, without moderator rights.
+- **Viewer:** For all other people.
+
+In the app:
+
+- **Join:** Paste any `meet.ffmuc.net` link in the start field: a host link (`/reserve/h/…`), a speaker link (`/reserve/s/…`), a viewer link or a manage link. The app shows the room and your role before you join. If the link expired, was deleted or was replaced, the app tells you. To keep a host link, click **Save to My rooms**.
+- **My rooms:** Click **My rooms** in the left bar, or use the **Reserved rooms** card on the start page. The card shows your next rooms. You can:
   - reserve a new room (the app does a short security check),
   - add a room from a manage link or host link,
   - join as host, copy the links, extend the room, make new links, delete the room, or remove it from the list.

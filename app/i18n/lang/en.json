@@ -16,7 +16,14 @@
 		"invalidServerTimeout": "Invalid value for Server Timeout",
 		"serverUrl": "Server URL",
 		"serverTimeout": "Server Timeout (in seconds)",
-		"disableAGC": "Disable automatic gain control"
+		"disableAGC": "Disable automatic gain control",
+		"theme": {
+			"label": "Theme",
+			"system": "System",
+			"light": "Light",
+			"dark": "Dark",
+			"systemHint": "Follows the light or dark mode of your computer."
+		}
 	},
 	"remoteControl": {
 		"message": "Allow remote control of this computer?",
@@ -51,7 +58,7 @@
 		"import": "Add a room",
 		"importPlaceholder": "Paste a manage link or host link",
 		"importButton": "Add",
-		"empty": "You have no rooms. Reserve a new room or add a room from a link.",
+		"empty": "You have no rooms yet.",
 		"created": "Room {{room}} is reserved.",
 		"imported": "Room {{room}} was added.",
 		"copied": "Copied to the clipboard.",
@@ -80,7 +87,7 @@
 			"years": "{{count}} year",
 			"years_plural": "{{count}} years"
 		},
-		"copy": "Copy link:",
+		"copy": "Copy:",
 		"copyHint": {
 			"host": "Host link: join with moderator rights",
 			"speaker": "Speaker link: join and talk",
@@ -89,11 +96,11 @@
 			"all": "All links as text"
 		},
 		"links": {
-			"host": "Host",
+			"host": "Host link",
 			"speaker": "Speaker",
 			"viewer": "Viewer",
-			"manage": "Manage",
-			"all": "All"
+			"manage": "Manage link",
+			"all": "All links"
 		},
 		"copyAllHeader": "Room {{room}}",
 		"rotate": "New links",
@@ -117,6 +124,64 @@
 			"title": "Room {{room}} expires soon",
 			"body": "The room expires in {{count}} day, on {{date}}. Click to extend it.",
 			"body_plural": "The room expires in {{count}} days, on {{date}}. Click to extend it."
+		},
+		"intro": "A room of your own with links that stay. Three access levels: host, speaker and viewer. No account.",
+		"howItWorks": "How it works",
+		"roles": {
+			"host": "Host",
+			"speaker": "Speaker",
+			"viewer": "Viewer"
+		},
+		"roleHints": {
+			"host": "For you and co-hosts. Whoever has this link moderates the room.",
+			"speaker": "For people who should talk directly, without moderator rights.",
+			"viewer": "Share this with everyone else."
+		},
+		"actions": {
+			"extend": "Extend",
+			"rotate": "New links",
+			"delete": "Delete"
+		},
+		"actionHints": {
+			"extend": "Keep the room longer. The links stay the same.",
+			"rotate": "Make new host and speaker links. The old ones stop working. The viewer link stays.",
+			"delete": "Close the room for everyone. All links stop working."
+		},
+		"emptyCreate": "Reserve a room",
+		"emptyImport": "Add a room I already have",
+		"createHint": "Pick how long you need the room. You can extend it later.",
+		"importHint": "Paste the manage link or host link of a room you reserved before.",
+		"share": {
+			"speaker": "Share speaker link",
+			"viewer": "Share viewer link"
+		},
+		"cardTitle": "Reserved rooms",
+		"cardIntro": "Your own room with links that stay. Host, speaker and viewer links. No account.",
+		"showAll": "Show all ({{count}})",
+		"myRoomsHint": "My rooms: reserve, share and manage your rooms"
+	},
+	"welcome": {
+		"title": "Join a meeting",
+		"placeholder": "Room name or link",
+		"helper": "Type a room name, or paste any {{server}} link. Host, speaker and viewer links work.",
+		"join": "Join",
+		"startNew": "Start a new meeting",
+		"joinAs": {
+			"host": "Join as host",
+			"speaker": "Join as speaker",
+			"viewer": "Join as viewer"
+		},
+		"checking": "Checking the link…",
+		"room": "Room {{room}}",
+		"saveToMyRooms": "Save to My rooms",
+		"inMyRooms": "This room is in My rooms.",
+		"linkErrors": {
+			"expired": "This room has expired. Ask the room owner for a new link.",
+			"deleted": "The owner deleted this room. The link does not work anymore.",
+			"replaced": "This link was replaced by a new link. Ask the room owner for the new link.",
+			"unknown": "This link does not open a room. Make sure that you copied the full link.",
+			"invalid": "This link does not open a room. Make sure that you copied the full link.",
+			"forbidden": "This link cannot join with this role."
 		}
 	}
 }

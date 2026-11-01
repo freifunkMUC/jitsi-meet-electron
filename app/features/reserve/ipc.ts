@@ -2,6 +2,7 @@ import {
     IDurations,
     IPowProgress,
     IReserveConference,
+    IReserveLinkInfo,
     IRoomList,
     IRoomSummary,
     RESERVE_EVENTS,
@@ -21,6 +22,16 @@ const invoke = <T>(channel: string, ...args: unknown[]): Promise<ReserveIpcResul
  */
 export function joinReserveLink(input: string): Promise<ReserveIpcResult<IReserveConference>> {
     return invoke(RESERVE_INVOKE_CHANNELS.join, input);
+}
+
+/**
+ * Tells what a host, speaker or manage link opens, before the join.
+ *
+ * @param {string} input - The link.
+ * @returns {Promise<ReserveIpcResult<IReserveLinkInfo>>}
+ */
+export function inspectReserveLink(input: string): Promise<ReserveIpcResult<IReserveLinkInfo>> {
+    return invoke(RESERVE_INVOKE_CHANNELS.inspect, input);
 }
 
 /**

@@ -26,6 +26,7 @@ import * as URL from 'url';
 import config from './app/features/config';
 import { parseReserveLink } from './app/features/reserve/client/links';
 import { resolveReserveJoin, setupReserveMain, toIpcResult } from './app/features/reserve/main';
+import { setupThemeMain, themeBackgroundColor } from './app/features/settings/themeMain';
 import { openExternalLink } from './app/features/utils/openExternalLink';
 import { t } from './app/i18n/main';
 import pkgJson from './package.json';
@@ -245,6 +246,7 @@ function createJitsiMeetWindow() {
         icon: path.resolve(basePath, './resources/icon.png'),
         minWidth: 480,
         minHeight: 600,
+        backgroundColor: themeBackgroundColor(),
         show: false,
         webPreferences: {
             enableBlinkFeatures: 'WebAssemblyCSP',
@@ -487,6 +489,8 @@ app.on('certificate-error',
     }
 );
 
+// Before the windows open, so they use the saved theme.
+app.on('ready', setupThemeMain);
 app.on('ready', createJitsiMeetWindow);
 
 if (isDev) {
@@ -683,6 +687,7 @@ function openMeetingWindow(conference: unknown) {
         minHeight: 600,
         icon: path.resolve(basePath, './resources/icon.png'),
         resizable: true,
+        backgroundColor: themeBackgroundColor(),
         show: false,
         webPreferences: {
             enableBlinkFeatures: 'WebAssemblyCSP',

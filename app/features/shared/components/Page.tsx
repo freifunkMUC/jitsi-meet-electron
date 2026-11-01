@@ -9,6 +9,8 @@ interface IProps {
 
 const PageLayout = styled.div`
     display: flex;
+    background: var(--bg);
+    color: var(--text);
     flex-direction: row;
     height: 100vh;
     overflow: hidden;

@@ -15,6 +15,7 @@ import { SettingsContainer, TogglesContainer } from '../styled';
 import ServerTimeoutField from './ServerTimeoutField';
 import ServerURLField from './ServerURLField';
 import SettingToggle from './SettingToggle';
+import ThemeSetting from './ThemeSetting';
 
 interface IProps extends WithTranslation {
     dispatch: Dispatch;
@@ -30,9 +31,10 @@ const getDrawerTransform = (props: { isOpen?: boolean; }) => {
 };
 
 const Drawer = styled.div<{ isOpen?: boolean; }>`
-    background: #1a1a1a;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
-    color: #f4f5f7;
+    background: var(--bg);
+    border-right: 1px solid var(--line);
+    box-shadow: ${p => (p.isOpen ? 'var(--drawer-shadow)' : 'none')};
+    color: var(--text);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -42,15 +44,19 @@ const Drawer = styled.div<{ isOpen?: boolean; }>`
     top: 0;
     transform: ${getDrawerTransform};
     transition: transform 0.25s ease;
-    width: 360px;
+    width: min(400px, 100vw);
     z-index: 400;
 `;
 
 const DrawerHeader = styled.div`
     align-items: center;
+    background: var(--bg);
     display: flex;
     gap: 12px;
     padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 `;
 
 const BackButton = styled.button`
@@ -98,13 +104,13 @@ class SettingsDrawer extends Component<IProps> {
                         aria-label = { t('settings.back') }
                         onClick = { this._onBackButton }>
                         <ArrowLeftIcon
-                            color = 'white'
                             size = { 24 } />
                     </BackButton>
                     <Logo />
                 </DrawerHeader>
                 <DrawerContainer>
                     <SettingsContainer>
+                        <ThemeSetting />
                         <ServerURLField />
                         <ServerTimeoutField />
                         <TogglesContainer>

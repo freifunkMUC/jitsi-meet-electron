@@ -33,11 +33,17 @@ export interface IRecentListState {
 /**
  * Redux state of the settings feature.
  */
+/**
+ * Colour theme. "system" follows the operating system.
+ */
+export type ThemeSource = 'dark' | 'light' | 'system';
+
 export interface ISettingsState {
     alwaysOnTopWindowEnabled: boolean;
     disableAGC: boolean;
     serverTimeout?: number;
     serverURL?: string;
+    theme?: ThemeSource;
 }
 
 /**

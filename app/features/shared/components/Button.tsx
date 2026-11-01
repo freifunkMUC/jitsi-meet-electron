@@ -19,16 +19,18 @@ const getPadding = (props: IStyleProps) => {
         return '0';
     }
 
-    return '6px 14px';
+    return '8px 16px';
 };
 
 const getPrimaryStyles = (props: IStyleProps) => {
     if (props.appearance === 'primary') {
         return `
-            background: #0073e0;
-            color: white;
-            &:hover { background: #4678ed; }
-            &:active { background: #4678ed; }
+            background: var(--accent-grad);
+            box-shadow: var(--accent-shadow);
+            color: #ffffff;
+            font-weight: 700;
+            &:hover:not(:disabled) { filter: brightness(1.08); }
+            &:active:not(:disabled) { transform: translateY(1px); }
         `;
     }
 
@@ -40,7 +42,7 @@ const getSubtleStyles = (props: IStyleProps) => {
         return `
             background: transparent;
             color: inherit;
-            &:hover { background: rgba(255, 255, 255, 0.1); }
+            &:hover { background: var(--hover); }
         `;
     }
 
@@ -50,9 +52,10 @@ const getSubtleStyles = (props: IStyleProps) => {
 const getDefaultStyles = (props: IStyleProps) => {
     if (props.appearance !== 'primary' && props.appearance !== 'subtle') {
         return `
-            background: #e0e0e0;
-            color: #333;
-            &:hover { background: #c8c8c8; }
+            background: var(--btn-bg);
+            border: 1px solid var(--line);
+            color: var(--btn-text);
+            &:hover:not(:disabled) { background: var(--btn-bg-hover); }
         `;
     }
 
@@ -62,16 +65,21 @@ const getDefaultStyles = (props: IStyleProps) => {
 const StyledButton = styled.button<IStyleProps>`
     align-items: center;
     border: none;
-    border-radius: 4px;
+    border-radius: 14px;
     cursor: pointer;
     display: inline-flex;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     gap: 6px;
     justify-content: center;
     outline: none;
     padding: ${getPadding};
-    transition: background 0.15s;
+    transition: background 0.15s, filter 0.15s;
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.55;
+    }
 
     ${getPrimaryStyles}
     ${getSubtleStyles}

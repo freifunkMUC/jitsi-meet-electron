@@ -11,7 +11,8 @@ import { onOpenExtend, onPowProgress, roomsApi } from '../ipc';
 import type { IDurations, IPowProgress, IRoomSummary, ReserveIpcResult, RoomLinkKind } from '../types';
 
 import RoomItem from './RoomItem';
-import { Muted, Notice, Progress, Row, Section, SectionTitle, Select, SmallButton } from './styled';
+import { onMyRoomsFocus } from './focus';
+import { Badge, BadgeRole, Hint, Muted, Notice, Progress, Row, Section, SectionTitle, Select, SmallButton } from './styled';
 import { formatDuration } from './util';
 
 interface IProps extends WithTranslation {
@@ -20,9 +21,10 @@ interface IProps extends WithTranslation {
 }
 
 const Drawer = styled.div<{ isOpen?: boolean; }>`
-    background: #1a1a1a;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
-    color: #f4f5f7;
+    background: var(--bg);
+    border-right: 1px solid var(--line);
+    box-shadow: ${p => (p.isOpen ? 'var(--drawer-shadow)' : 'none')};
+    color: var(--text);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -32,15 +34,19 @@ const Drawer = styled.div<{ isOpen?: boolean; }>`
     top: 0;
     transform: ${p => (p.isOpen ? 'translateX(0)' : 'translateX(-100%)')};
     transition: transform 0.25s ease;
-    width: 360px;
+    width: min(400px, 100vw);
     z-index: 400;
 `;
 
 const DrawerHeader = styled.div`
     align-items: center;
+    background: var(--bg);
     display: flex;
     gap: 12px;
     padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 `;
 
 const Title = styled.h2`
@@ -63,6 +69,48 @@ const IconButton = styled.button`
     }
 `;
 
+const Intro = Section;
+
+const IntroText = styled.p`
+    font-size: 14px;
+    line-height: 1.45;
+    margin: 0;
+`;
+
+const Details = styled.details`
+    font-size: 13px;
+
+    summary {
+        color: var(--accent-text);
+        cursor: pointer;
+        font-weight: 600;
+    }
+`;
+
+const HelpList = styled.dl`
+    display: grid;
+    gap: 8px 10px;
+    grid-template-columns: auto 1fr;
+    margin: 10px 0 0;
+
+    dt {
+        font-weight: 700;
+    }
+
+    dd {
+        color: var(--muted);
+        margin: 0;
+    }
+`;
+
+const Empty = styled(Section)`
+    align-items: stretch;
+    text-align: center;
+`;
+
+const ROLES: BadgeRole[] = [ 'host', 'speaker', 'viewer' ];
+const ACTIONS = [ 'extend', 'rotate', 'delete' ];
+
 const FALLBACK: IDurations = { default: 168, durations: [ 72, 168, 720, 2160, 8760 ], maxAheadH: 8760 };
 
 /**
@@ -83,6 +131,13 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
     const [ info, setInfo ] = useState<string>();
     const [ extendOpen, setExtendOpen ] = useState<string>();
     const infoTimer = useRef<ReturnType<typeof setTimeout>>();
+    const createRef = useRef<HTMLElement>(null);
+    const importRef = useRef<HTMLElement>(null);
+
+    const focusSection = (ref: React.RefObject<HTMLElement>) => {
+        ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        ref.current?.querySelector<HTMLElement>('select, input')?.focus();
+    };
 
     const showInfo = useCallback((text: string) => {
         clearTimeout(infoTimer.current);
@@ -112,6 +167,11 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
     }, []);
 
     useEffect(() => onPowProgress(setProgress), []);
+
+    // The welcome page can ask to open a section. Wait for the drawer to slide in.
+    useEffect(() => onMyRoomsFocus(section => {
+        setTimeout(() => focusSection(section === 'create' ? createRef : importRef), 350);
+    }), []);
 
     // A click on an expiry reminder opens the extend options of the room.
     useEffect(() => {
@@ -189,7 +249,6 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
                     aria-label = { t('settings.back') }
                     onClick = { () => dispatch(closeDrawer()) }>
                     <ArrowLeftIcon
-                        color = 'white'
                         size = { 24 } />
                 </IconButton>
                 <Title>{ t('reserve.myRooms') }</Title>
@@ -200,6 +259,26 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
                 </SmallButton>
             </DrawerHeader>
             <DrawerContainer>
+                <Intro>
+                    <IntroText>{ t('reserve.intro') }</IntroText>
+                    <Details open = { rooms.length === 0 }>
+                        <summary>{ t('reserve.howItWorks') }</summary>
+                        <HelpList>
+                            { ROLES.map(role => (
+                                <React.Fragment key = { role }>
+                                    <dt><Badge $role = { role }>{ t(`reserve.roles.${role}`) }</Badge></dt>
+                                    <dd>{ t(`reserve.roleHints.${role}`) }</dd>
+                                </React.Fragment>
+                            )) }
+                            { ACTIONS.map(action => (
+                                <React.Fragment key = { action }>
+                                    <dt>{ t(`reserve.actions.${action}`) }</dt>
+                                    <dd>{ t(`reserve.actionHints.${action}`) }</dd>
+                                </React.Fragment>
+                            )) }
+                        </HelpList>
+                    </Details>
+                </Intro>
                 { !persistent && <Notice kind = 'warning'>{ t('reserve.notPersistent') }</Notice> }
                 { error && (
                     <Notice
@@ -215,8 +294,38 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
                         { info }
                     </Notice>
                 ) }
-                <Section>
+                { rooms.length === 0 && (
+                    <Empty>
+                        <Muted>{ t('reserve.empty') }</Muted>
+                        <SmallButton
+                            onClick = { () => focusSection(createRef) }
+                            primary = { true }>
+                            { t('reserve.emptyCreate') }
+                        </SmallButton>
+                        <SmallButton onClick = { () => focusSection(importRef) }>
+                            { t('reserve.emptyImport') }
+                        </SmallButton>
+                    </Empty>
+                ) }
+                { rooms.map(room => (
+                    <RoomItem
+                        busy = { busy }
+                        defaultDurations = { d.durations }
+                        defaultMaxAheadH = { d.maxAheadH }
+                        extendOpen = { extendOpen === room.room }
+                        key = { room.room }
+                        onCopy = { onCopy }
+                        onDelete = { onDelete }
+                        onExtend = { onExtend }
+                        onJoin = { onJoin }
+                        onRemove = { onRemove }
+                        onRotate = { onRotate }
+                        onToggleExtend = { r => setExtendOpen(o => (o === r ? undefined : r)) }
+                        room = { room } />
+                )) }
+                <Section innerRef = { createRef }>
                     <SectionTitle>{ t('reserve.create') }</SectionTitle>
+                    <Hint>{ t('reserve.createHint') }</Hint>
                     <Row>
                         <Select
                             aria-label = { t('reserve.duration.label') }
@@ -252,8 +361,9 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
                         </>
                     ) }
                 </Section>
-                <Section>
+                <Section innerRef = { importRef }>
                     <SectionTitle>{ t('reserve.import') }</SectionTitle>
+                    <Hint>{ t('reserve.importHint') }</Hint>
                     <FieldText
                         isLabelHidden = { true }
                         onChange = { e => setImportLink(e.currentTarget.value) }
@@ -268,27 +378,6 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
                         </SmallButton>
                     </Row>
                 </Section>
-                { rooms.length === 0 && (
-                    <Section>
-                        <Muted>{ t('reserve.empty') }</Muted>
-                    </Section>
-                ) }
-                { rooms.map(room => (
-                    <RoomItem
-                        busy = { busy }
-                        defaultDurations = { d.durations }
-                        defaultMaxAheadH = { d.maxAheadH }
-                        extendOpen = { extendOpen === room.room }
-                        key = { room.room }
-                        onCopy = { onCopy }
-                        onDelete = { onDelete }
-                        onExtend = { onExtend }
-                        onJoin = { onJoin }
-                        onRemove = { onRemove }
-                        onRotate = { onRotate }
-                        onToggleExtend = { r => setExtendOpen(o => (o === r ? undefined : r)) }
-                        room = { room } />
-                )) }
             </DrawerContainer>
         </Drawer>
     );

@@ -10,12 +10,16 @@ import type { IState } from '../../../types';
 import config from '../../config';
 import { Navbar } from '../../navbar';
 import { RecentList, addRecentListEntry } from '../../recent-list';
-import { joinReserveLink, parseReserveLink } from '../../reserve';
+import { IReserveLinkInfo, inspectReserveLink, joinReserveLink, parseReserveLink, roomsApi } from '../../reserve';
+import { ReservedRoomsCard } from '../../reserve/components';
+import { Badge, BadgeRole } from '../../reserve/components/styled';
 import Button from '../../shared/components/Button';
+import { CardTitle } from '../../shared/components/Card';
 import FieldText from '../../shared/components/FieldText';
 import Page from '../../shared/components/Page';
 import { createConferenceObjectFromURL } from '../../utils';
-import { Body, Form, Header, Label, Wrapper } from '../styled';
+import { describeWelcomeInput, serverHost } from '../functions';
+import { Body, Form, Header, Wrapper } from '../styled';
 
 
 const MainFieldText = styled(FieldText)`
@@ -28,10 +32,42 @@ const MainGoButton = styled(Button)`
     height: 3em;
 `;
 
-const ErrorText = styled.div`
-    color: #ff8f73;
-    margin-top: 8px;
-    text-align: center;
+const HelperText = styled.p`
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+    margin: -4px 0 0;
+`;
+
+const Preview = styled.div<{ kind: 'error' | 'ok'; }>`
+    align-items: center;
+    background: ${p => (p.kind === 'error' ? 'var(--notice-error-bg)' : 'var(--hover)')};
+    border: 1px solid ${p => (p.kind === 'error' ? 'var(--notice-error-line)' : 'var(--line)')};
+    border-left: 4px solid ${p => (p.kind === 'error' ? 'var(--danger)' : 'var(--accent)')};
+    border-radius: var(--radius-sm);
+    color: ${p => (p.kind === 'error' ? 'var(--notice-error-text)' : 'var(--text)')};
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    font-size: 13px;
+    padding: 10px 12px;
+`;
+
+const PreviewRoom = styled.span`
+    font-weight: 700;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+`;
+
+const PreviewHint = styled.span`
+    color: var(--muted);
+    flex-basis: 100%;
+`;
+
+const SaveButton = styled(Button)`
+    margin-left: auto;
 `;
 
 interface IProps extends WithTranslation {
@@ -49,6 +85,13 @@ interface IProps extends WithTranslation {
 interface IWelcomeState {
     animateTimeoutId?: ReturnType<typeof setTimeout>;
     generatedRoomname: string;
+
+    /**
+     * What a pasted host, speaker or manage link opens.
+     */
+    linkInfo?: IReserveLinkInfo;
+    linkLoading: boolean;
+    linkSaved: boolean;
     reserveError?: string;
     reserveJoining: boolean;
     roomPlaceholder: string;
@@ -84,6 +127,9 @@ class Welcome extends Component<IProps, IWelcomeState> {
         this.state = {
             animateTimeoutId: undefined,
             generatedRoomname: '',
+            linkInfo: undefined,
+            linkLoading: false,
+            linkSaved: false,
             reserveError: undefined,
             reserveJoining: false,
             roomPlaceholder: '',
@@ -96,6 +142,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
         this._onURLChange = this._onURLChange.bind(this);
         this._onFormSubmit = this._onFormSubmit.bind(this);
         this._onJoin = this._onJoin.bind(this);
+        this._onSaveLink = this._onSaveLink.bind(this);
         this._updateRoomname = this._updateRoomname.bind(this);
     }
 
@@ -106,6 +153,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
      */
     componentDidMount() {
         this._updateRoomname();
+        this._inspect(this.state.url);
     }
 
     /**
@@ -115,6 +163,54 @@ class Welcome extends Component<IProps, IWelcomeState> {
      */
     componentWillUnmount() {
         this._clearTimeouts();
+        clearTimeout(this._inspectTimeout);
+    }
+
+    _inspectTimeout?: ReturnType<typeof setTimeout>;
+
+    /**
+     * Shows what a pasted reserve link opens, before the join. Waits a short
+     * time, so typing does not send requests.
+     *
+     * @param {string} url - Field value.
+     * @returns {void}
+     */
+    _inspect(url: string) {
+        clearTimeout(this._inspectTimeout);
+        if (!parseReserveLink(url)) {
+            this.setState({ linkInfo: undefined, linkLoading: false, linkSaved: false });
+
+            return;
+        }
+        this.setState({ linkInfo: undefined, linkLoading: true, linkSaved: false });
+        this._inspectTimeout = setTimeout(async () => {
+            const result = await inspectReserveLink(url);
+
+            // Ignore old answers.
+            if (this.state.url !== url) {
+                return;
+            }
+            this.setState({
+                linkInfo: result.ok ? result.value : undefined,
+                linkLoading: false,
+                reserveError: result.ok ? undefined : result.reason
+            });
+        }, 300);
+    }
+
+    /**
+     * Adds the room of a pasted host or manage link to "My rooms".
+     *
+     * @returns {Promise<void>}
+     */
+    async _onSaveLink() {
+        const result = await roomsApi.import(this.state.url.trim());
+
+        if (result.ok) {
+            this.setState({ linkSaved: true });
+        } else {
+            this.setState({ reserveError: result.reason });
+        }
     }
 
     /**
@@ -237,7 +333,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
             return;
         }
 
-        this.setState({ url: '' });
+        this.setState({ linkInfo: undefined, url: '' });
         window.jitsiElectronApp.ipc.send('open-meeting-window', result.value);
     }
 
@@ -249,10 +345,13 @@ class Welcome extends Component<IProps, IWelcomeState> {
      * @returns {void}
      */
     _onURLChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const url = event.currentTarget.value;
+
         this.setState({
             reserveError: undefined,
-            url: event.currentTarget.value
+            url
         });
+        this._inspect(url);
     }
 
     /**
@@ -278,34 +377,99 @@ class Welcome extends Component<IProps, IWelcomeState> {
         const locationError = locationState?.error;
         const { t } = this.props;
         const { reserveError, reserveJoining } = this.state;
+        const serverURL = this.props._serverURL || config.defaultServerURL;
+        const input = describeWelcomeInput(this.state.url, serverURL);
+        let goLabel = t('welcome.join');
+
+        if (reserveJoining) {
+            goLabel = t('reserve.joining');
+        } else if (input.type === 'empty') {
+            goLabel = t('welcome.startNew');
+        } else if (this.state.linkInfo) {
+            goLabel = t(`welcome.joinAs.${this.state.linkInfo.role}`);
+        } else if (input.type === 'viewer') {
+            goLabel = t('welcome.joinAs.viewer');
+        }
 
         return (
             <Header>
                 <Form onSubmit = { this._onFormSubmit }>
-                    <Label>{ t('enterConferenceNameOrUrl') } </Label>
+                    <CardTitle>{ t('welcome.title') }</CardTitle>
                     <MainFieldText
                         autoFocus = { true }
                         isInvalid = { Boolean(locationError || reserveError) }
                         isLabelHidden = { true }
                         onChange = { this._onURLChange }
-                        placeholder = { this.state.roomPlaceholder }
+                        placeholder = { t('welcome.placeholder') }
                         shouldFitContainer = { true }
                         type = 'text'
                         value = { this.state.url } />
+                    <HelperText>
+                        { t('welcome.helper', { server: serverHost(serverURL) }) }
+                    </HelperText>
+                    { this._renderPreview(input.type === 'viewer' ? input.conference.room : undefined) }
                     <MainGoButton
                         appearance = 'primary'
-                        disabled = { reserveJoining }
+                        disabled = { reserveJoining || this.state.linkLoading }
                         onClick = { this._onJoin }
                         type = 'button'>
-                        { reserveJoining ? t('reserve.joining') : t('go') }
+                        { goLabel }
                     </MainGoButton>
-                    { reserveError && (
-                        <ErrorText role = 'alert'>
-                            { t('reserve.joinFailed') } { t(`reserve.errors.${reserveError}`) }
-                        </ErrorText>
-                    ) }
                 </Form>
+                <ReservedRoomsCard />
             </Header>
+        );
+    }
+
+    /**
+     * Renders what the field value opens: the room and the role, or an error.
+     *
+     * @param {string} viewerRoom - Room of a viewer link.
+     * @returns {ReactElement|null}
+     */
+    _renderPreview(viewerRoom?: string) {
+        const { t } = this.props;
+        const { linkInfo, linkLoading, linkSaved, reserveError } = this.state;
+
+        if (reserveError) {
+            return (
+                <Preview
+                    kind = 'error'
+                    role = 'alert'>
+                    { t([ `welcome.linkErrors.${reserveError}`, `reserve.errors.${reserveError}` ]) }
+                </Preview>
+            );
+        }
+
+        if (linkLoading) {
+            return <Preview kind = 'ok'>{ t('welcome.checking') }</Preview>;
+        }
+
+        const room = linkInfo?.room ?? viewerRoom;
+
+        if (!room) {
+            return null;
+        }
+
+        const role: BadgeRole = linkInfo?.role ?? 'viewer';
+        const canSave = linkInfo && linkInfo.kind !== 'speaker' && !linkInfo.saved;
+
+        return (
+            <Preview
+                kind = 'ok'
+                role = 'status'>
+                <PreviewRoom title = { room }>{ t('welcome.room', { room }) }</PreviewRoom>
+                <Badge $role = { role }>{ t(`reserve.roles.${role}`) }</Badge>
+                { canSave && !linkSaved && (
+                    <SaveButton
+                        onClick = { this._onSaveLink }
+                        type = 'button'>
+                        { t('welcome.saveToMyRooms') }
+                    </SaveButton>
+                ) }
+                { (linkSaved || linkInfo?.saved) && <PreviewHint>{ t('welcome.inMyRooms') }</PreviewHint> }
+                <PreviewHint>{ t(`reserve.roleHints.${role}`) }</PreviewHint>
+            </Preview>
         );
     }
 

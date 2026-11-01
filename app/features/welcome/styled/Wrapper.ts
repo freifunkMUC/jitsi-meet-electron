@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 
 export default styled.div`
-    background: black;
+    background: var(--bg);
     min-height: 100vh;
     min-width: 100%;
 `;

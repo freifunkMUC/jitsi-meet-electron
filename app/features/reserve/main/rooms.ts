@@ -109,6 +109,17 @@ export class RoomsService {
     }
 
     /**
+     * Tells if "My rooms" has the room of a host secret.
+     *
+     * @param {string} baseURL - Reserve service base URL of the link.
+     * @param {string} secret - Host secret.
+     * @returns {boolean}
+     */
+    hasHostSecret(baseURL: string, secret: string): boolean {
+        return baseURL === this.baseURL && this._store.list().some(r => r.secret === secret);
+    }
+
+    /**
      * Reserves a new room.
      *
      * @param {number} hours - Duration.

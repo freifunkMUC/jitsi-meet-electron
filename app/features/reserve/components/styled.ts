@@ -1,17 +1,21 @@
 import styled from 'styled-components';
 
 export const Section = styled.section`
-    border-bottom: 1px solid #333;
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 10px;
+    padding: 16px;
 `;
 
 export const SectionTitle = styled.h3`
-    color: #c6c6c6;
+    color: var(--muted);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     margin: 0;
     text-transform: uppercase;
 `;
@@ -20,30 +24,40 @@ export const Row = styled.div`
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
 `;
 
 export const Select = styled.select`
-    background: #3e3e3e;
-    border: 2px solid #3e3e3e;
-    border-radius: 4px;
-    color: #f4f5f7;
+    background: var(--input-bg);
+    border: 1px solid var(--input-line);
+    border-radius: var(--radius-sm);
+    color: var(--text);
     flex: 1;
     font-size: 14px;
-    padding: 6px 8px;
+    min-width: 0;
+    padding: 8px 10px;
+
+    &:focus {
+        border-color: var(--focus-ring);
+        outline: none;
+    }
 `;
 
 export const SmallButton = styled.button<{ danger?: boolean; primary?: boolean; }>`
-    background: ${p => (p.primary ? '#0073e0' : p.danger ? '#5c1f14' : '#3e3e3e')};
-    border: none;
-    border-radius: 4px;
-    color: white;
+    background: ${p => (p.primary ? 'var(--accent-grad)' : p.danger ? 'var(--danger-btn-bg)' : 'var(--btn-bg)')};
+    border: 1px solid ${p => (p.primary ? 'transparent' : 'var(--line)')};
+    border-radius: 10px;
+    box-shadow: ${p => (p.primary ? 'var(--accent-shadow)' : 'none')};
+    color: ${p => (p.primary ? '#ffffff' : p.danger ? 'var(--danger-btn-text)' : 'var(--btn-text)')};
     cursor: pointer;
     font-size: 13px;
-    padding: 5px 10px;
+    font-weight: ${p => (p.primary ? 700 : 600)};
+    padding: 7px 12px;
+    transition: background 0.15s, filter 0.15s;
 
     &:hover:not(:disabled) {
-        filter: brightness(1.2);
+        background: ${p => (p.primary ? 'var(--accent-grad)' : p.danger ? 'var(--danger-btn-bg)' : 'var(--btn-bg-hover)')};
+        filter: ${p => (p.primary || p.danger ? 'brightness(1.08)' : 'none')};
     }
 
     &:disabled {
@@ -52,18 +66,49 @@ export const SmallButton = styled.button<{ danger?: boolean; primary?: boolean; 
     }
 `;
 
+const NOTICE = {
+    error: [ 'var(--notice-error-bg)', 'var(--notice-error-line)', 'var(--notice-error-text)' ],
+    info: [ 'var(--notice-info-bg)', 'var(--notice-info-line)', 'var(--notice-info-text)' ],
+    warning: [ 'var(--notice-warn-bg)', 'var(--notice-warn-line)', 'var(--notice-warn-text)' ]
+};
+
 export const Notice = styled.div<{ kind: 'error' | 'info' | 'warning'; }>`
-    background: ${p => (p.kind === 'error' ? '#5c1f14' : p.kind === 'warning' ? '#5c4a14' : '#1f3a5c')};
-    border-radius: 4px;
+    background: ${p => NOTICE[p.kind][0]};
+    border: 1px solid ${p => NOTICE[p.kind][1]};
+    border-radius: var(--radius-sm);
+    color: ${p => NOTICE[p.kind][2]};
     font-size: 13px;
-    padding: 8px 10px;
+    padding: 10px 12px;
 `;
 
 export const Progress = styled.progress`
-    width: 100%;
+    accent-color: var(--accent);
+    flex: 1;
 `;
 
 export const Muted = styled.span`
-    color: #a0a0a0;
+    color: var(--muted);
     font-size: 12px;
+`;
+
+export const Hint = styled.p`
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.45;
+    margin: 0;
+`;
+
+export type BadgeRole = 'host' | 'speaker' | 'viewer';
+
+export const Badge = styled.span<{ $role: BadgeRole; }>`
+    background: var(--badge-${p => p.$role}-bg);
+    border-radius: 999px;
+    color: var(--badge-${p => p.$role}-text);
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 3px 9px;
+    text-transform: uppercase;
+    white-space: nowrap;
 `;
