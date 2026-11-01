@@ -75,7 +75,7 @@ describe('RoomStore', () => {
         const again = new RoomStore(file, fakeEncryptor());
 
         await again.load();
-        assert.deepEqual(again.list(), [ { room: 'r1', secret: S1, expires: '2027-01-01T00:00:00Z' } ]);
+        assert.deepEqual(again.list(), [ { room: 'r1', secret: S1, expires: '2027-01-01T00:00:00Z', reminded: undefined } ]);
     });
 
     it('keeps rooms in memory only when encryption is not available', async () => {

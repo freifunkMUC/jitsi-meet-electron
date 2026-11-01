@@ -6,6 +6,7 @@ import {
     ReserveError,
     hostSecretFromManageURL
 } from '../client';
+import { dueReminder } from '../reminders';
 import { IReserveConference, IRoomList, IRoomSummary, RoomStatus } from '../types';
 
 import { IStoredRoom, RoomStore } from './store';
@@ -241,6 +242,42 @@ export class RoomsService {
     }
 
     /**
+     * Finds the active rooms that need an expiry reminder now.
+     *
+     * @returns {Array<Object>}
+     */
+    dueReminders(): Array<{ days: number; expires: string; room: string; }> {
+        const due = [];
+
+        for (const r of this._store.list()) {
+            const summary = this._summary(r);
+            const days = summary.status === 'active' ? dueReminder(summary.expires, r.reminded, this._now()) : undefined;
+
+            if (days !== undefined && summary.expires) {
+                due.push({ days, expires: summary.expires, room: r.room });
+            }
+        }
+
+        return due;
+    }
+
+    /**
+     * Notes that a reminder was shown, so it is not shown again.
+     *
+     * @param {string} room - Room name.
+     * @param {number} days - Reminder threshold.
+     * @param {string} expires - Room expiry of the reminder.
+     * @returns {Promise<void>}
+     */
+    async markReminded(room: string, days: number, expires: string): Promise<void> {
+        const r = this._store.get(room);
+
+        if (r) {
+            await this._store.put({ ...r, reminded: { days, expires } });
+        }
+    }
+
+    /**
      * Gets a stored room or throws.
      *
      * @param {string} room - Room name.
@@ -295,7 +332,13 @@ export class RoomsService {
             throw new ReserveError('internal', 200, 'no host secret in response');
         }
 
-        const stored: IStoredRoom = { expires: view.expires, room: view.room, secret };
+        const before = previous ?? this._store.get(view.room);
+        const stored: IStoredRoom = {
+            expires: view.expires,
+            reminded: before?.reminded?.expires === view.expires ? before.reminded : undefined,
+            room: view.room,
+            secret
+        };
 
         this._state.set(view.room, { checkedAt: this._now(), status: view.status as RoomStatus, view });
         this._store.put(stored).catch(e => console.error('reserve: cannot write the rooms file', e));

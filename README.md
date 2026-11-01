@@ -12,7 +12,23 @@ Desktop application for [FreifunkMeet] built with [Electron].
 - Screen sharing
 - Remote control
 - Always-On-Top window
-- Support for deeplinks such as `jitsi-meet://myroom` (will open `myroom` on the configured Jitsi instance) or `jitsi-meet://jitsi.mycompany.com/myroom` (will open `myroom` on the Jitsi instance running on `jitsi.mycompany.com`)
+- Deep links with `ffmuc-meet://` or `jitsi-meet://`:
+  - `ffmuc-meet://myroom` opens `myroom` on the configured server.
+  - `ffmuc-meet://jitsi.example.com/myroom` opens `myroom` on `jitsi.example.com`.
+  - `ffmuc-meet://meet.ffmuc.net/reserve/h/<secret>` opens a reserved room as host.
+- Reserved rooms (see [Reserved rooms](#reserved-rooms))
+
+## Reserved rooms
+
+You can reserve a room on `meet.ffmuc.net`. A reserved room has a fixed name and an expiry date.
+
+- **Join:** Paste a host link (`/reserve/h/…`), a speaker link (`/reserve/s/…`) or a manage link in the start field. The app gets a token and opens the room with your role.
+- **My rooms:** Click the calendar icon. You can:
+  - reserve a new room (the app does a short security check),
+  - add a room from a manage link or host link,
+  - join as host, copy the links, extend the room, make new links, delete the room, or remove it from the list.
+- **Storage:** The app keeps only the host secret, the room name and the expiry date. It encrypts this data with the key store of the operating system. If no key store is available, the app does not save the rooms. Then, keep your manage links in a safe place.
+- **Reminders:** The app shows a notification 3 days and 1 day before a room expires. Click the notification to extend the room.
 
 ## Installation
 
@@ -81,6 +97,12 @@ They can also be displayed automatically with the application `--show-dev-tools`
 
 ```bash
 SHOW_DEV_TOOLS=true npm start
+```
+
+#### Running the tests
+
+```bash
+npm test
 ```
 
 #### Building the production distribution

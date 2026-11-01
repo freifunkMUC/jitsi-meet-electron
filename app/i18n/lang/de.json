@@ -112,6 +112,11 @@
 				"detail": "Der Raum und alle Links funktionieren dann nicht mehr. Das kann nicht rückgängig gemacht werden.",
 				"ok": "Löschen"
 			}
+		},
+		"reminder": {
+			"title": "Raum {{room}} läuft bald ab",
+			"body": "Der Raum läuft in {{count}} Tag ab, am {{date}}. Klicke hier, um ihn zu verlängern.",
+			"body_plural": "Der Raum läuft in {{count}} Tagen ab, am {{date}}. Klicke hier, um ihn zu verlängern."
 		}
 	}
 }

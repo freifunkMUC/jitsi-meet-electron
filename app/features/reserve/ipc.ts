@@ -39,7 +39,8 @@ export const roomsApi = {
     list: () => invoke<IRoomList>(RESERVE_INVOKE_CHANNELS.list),
     refresh: (force = false) => invoke<IRoomList>(RESERVE_INVOKE_CHANNELS.refresh, force),
     remove: (room: string) => invoke<void>(RESERVE_INVOKE_CHANNELS.remove, room),
-    rotate: (room: string) => invoke<IRoomSummary | null>(RESERVE_INVOKE_CHANNELS.rotate, room)
+    rotate: (room: string) => invoke<IRoomSummary | null>(RESERVE_INVOKE_CHANNELS.rotate, room),
+    takeReminder: () => invoke<string | null>(RESERVE_INVOKE_CHANNELS.takeReminder)
 };
 
 /**
@@ -50,4 +51,15 @@ export const roomsApi = {
  */
 export function onPowProgress(listener: (p: IPowProgress) => void): () => void {
     return window.jitsiElectronApp.ipc.addListener(RESERVE_EVENTS.powProgress, listener) ?? (() => undefined);
+}
+
+/**
+ * Listens to clicks on expiry reminders. The listener then gets the room with
+ * {@code roomsApi.takeReminder}.
+ *
+ * @param {Function} listener - Listener.
+ * @returns {Function} Removes the listener.
+ */
+export function onOpenExtend(listener: () => void): () => void {
+    return window.jitsiElectronApp.ipc.addListener(RESERVE_EVENTS.openExtend, listener) ?? (() => undefined);
 }

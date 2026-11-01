@@ -1,5 +1,7 @@
 import { promises as fs } from 'fs';
 
+import type { IReminderMark } from '../reminders';
+
 /**
  * A room in "My rooms". Only these fields reach the disk, and only encrypted.
  */
@@ -9,6 +11,11 @@ export interface IStoredRoom {
      * Cached room expiry, RFC 3339.
      */
     expires?: string;
+
+    /**
+     * The last expiry reminder.
+     */
+    reminded?: IReminderMark;
     room: string;
 
     /**
@@ -146,8 +153,12 @@ export class RoomStore {
      * @returns {IStoredRoom}
      */
     protected _clean(r: IStoredRoom): IStoredRoom {
+        const m = r.reminded;
+
         return {
             expires: typeof r.expires === 'string' ? r.expires : undefined,
+            reminded: typeof m?.days === 'number' && typeof m?.expires === 'string'
+                ? { days: m.days, expires: m.expires } : undefined,
             room: r.room,
             secret: r.secret
         };

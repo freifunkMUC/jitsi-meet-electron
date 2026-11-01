@@ -536,10 +536,24 @@ for (const appProtocolPrefix of config.appProtocolPrefixes) {
     }
 }
 
+// Windows shows notifications (expiry reminders) only with this ID.
+if (process.platform === 'win32') {
+    app.setAppUserModelId(pkgJson.build.appId);
+}
+
 // Reserve API calls run here; the service does not allow cross-origin calls.
 setupReserveMain({
     isTrustedSender: sender => Boolean(mainWindow) && sender === mainWindow?.webContents,
-    parentWindow: () => mainWindow
+    parentWindow: () => mainWindow,
+    showWindow: () => {
+        if (mainWindow === null) {
+            createJitsiMeetWindow();
+        } else {
+            mainWindow.isMinimized() && mainWindow.restore();
+            mainWindow.show();
+            mainWindow.focus();
+        }
+    }
 });
 
 /**

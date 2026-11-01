@@ -112,6 +112,11 @@
 				"detail": "The room and all links stop working. You cannot undo this.",
 				"ok": "Delete"
 			}
+		},
+		"reminder": {
+			"title": "Room {{room}} expires soon",
+			"body": "The room expires in {{count}} day, on {{date}}. Click to extend it.",
+			"body_plural": "The room expires in {{count}} days, on {{date}}. Click to extend it."
 		}
 	}
 }

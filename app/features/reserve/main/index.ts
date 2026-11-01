@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { BrowserWindow, WebContents, app, clipboard, dialog, ipcMain, safeStorage } from 'electron';
+import { BrowserWindow, Notification, WebContents, app, clipboard, dialog, ipcMain, safeStorage } from 'electron';
 import path from 'path';
 
 import { t } from '../../../i18n/main';
@@ -127,7 +127,22 @@ export interface IReserveMainOptions {
      * Parent window of confirmation dialogs.
      */
     parentWindow: () => BrowserWindow | null;
+
+    /**
+     * Shows the launcher window. Creates it if it is closed.
+     */
+    showWindow: () => void;
 }
+
+/**
+ * Check for expiry reminders this often.
+ */
+export const REMINDER_INTERVAL_MS = 6 * 3600 * 1000;
+
+/**
+ * First reminder check after the app starts.
+ */
+const REMINDER_START_DELAY_MS = 30 * 1000;
 
 /**
  * Asks the user to confirm an action that cannot be undone.
@@ -158,8 +173,56 @@ async function confirm(parent: BrowserWindow | null, action: 'delete' | 'rotate'
  * @param {IReserveMainOptions} options - Options.
  * @returns {void}
  */
-export function setupReserveMain({ isTrustedSender, parentWindow }: IReserveMainOptions): void {
+export function setupReserveMain({ isTrustedSender, parentWindow, showWindow }: IReserveMainOptions): void {
     let pow: { aborted: boolean; } | undefined;
+    let reminderRoom: string | undefined;
+    const notifications = new Set<Notification>();
+
+    const openExtend = (room: string) => {
+        reminderRoom = room;
+        showWindow();
+        parentWindow()?.webContents.send(RESERVE_EVENTS.openExtend);
+    };
+
+    const checkReminders = async () => {
+        if (!Notification.isSupported()) {
+            return;
+        }
+        const service = await getRoomsService();
+
+        try {
+            await service.refresh(false);
+        } catch (e) {
+            // Offline or rate limited: use the cached expiry.
+        }
+
+        for (const { days, expires, room } of service.dueReminders()) {
+            const notification = new Notification({
+                body: t('reserve.reminder.body', {
+                    count: days,
+                    date: new Date(expires).toLocaleString(app.getLocale())
+                }),
+                title: t('reserve.reminder.title', { room })
+            });
+
+            // Keep a reference, else the click handler can be lost.
+            notifications.add(notification);
+            notification.on('close', () => notifications.delete(notification));
+            notification.on('click', () => {
+                notifications.delete(notification);
+                openExtend(room);
+            });
+            notification.show();
+            await service.markReminded(room, days, expires);
+        }
+    };
+
+    const runReminders = () => checkReminders().catch(e => console.error('reserve: reminder check failed', e));
+
+    app.whenReady().then(() => {
+        setTimeout(runReminders, REMINDER_START_DELAY_MS);
+        setInterval(runReminders, REMINDER_INTERVAL_MS);
+    });
 
     const handle = <T>(channel: string, fn: (sender: WebContents, ...args: any[]) => Promise<T>) => {
         ipcMain.handle(channel, (event, ...args) => {
@@ -201,6 +264,13 @@ export function setupReserveMain({ isTrustedSender, parentWindow }: IReserveMain
         return h;
     };
 
+    handle(RESERVE_INVOKE_CHANNELS.takeReminder, async () => {
+        const room = reminderRoom;
+
+        reminderRoom = undefined;
+
+        return room ?? null;
+    });
     handle(RESERVE_INVOKE_CHANNELS.join, async (_s, input: unknown) => resolveReserveJoin(String(input ?? '')));
     handle(RESERVE_INVOKE_CHANNELS.list, async () => (await getRoomsService()).list());
     handle(RESERVE_INVOKE_CHANNELS.refresh, async (_s, force: unknown) =>

@@ -17,13 +17,15 @@ export const RESERVE_INVOKE_CHANNELS = {
     list: 'reserve-rooms-list',
     refresh: 'reserve-rooms-refresh',
     remove: 'reserve-rooms-remove',
-    rotate: 'reserve-rooms-rotate'
+    rotate: 'reserve-rooms-rotate',
+    takeReminder: 'reserve-rooms-take-reminder'
 } as const;
 
 /**
  * IPC events from the main process to the launcher window.
  */
 export const RESERVE_EVENTS = {
+    openExtend: 'reserve-open-extend',
     powProgress: 'reserve-pow-progress'
 } as const;
 

@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { Dispatch, compose } from 'redux';
 import styled from 'styled-components';
 
-import { DrawerContainer, closeDrawer } from '../../navbar';
+import { DrawerContainer, closeDrawer, openDrawer } from '../../navbar';
 import FieldText from '../../shared/components/FieldText';
 import { ArrowLeftIcon } from '../../shared/icons';
-import { onPowProgress, roomsApi } from '../ipc';
+import { onOpenExtend, onPowProgress, roomsApi } from '../ipc';
 import type { IDurations, IPowProgress, IRoomSummary, ReserveIpcResult, RoomLinkKind } from '../types';
 
 import RoomItem from './RoomItem';
@@ -112,6 +112,22 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
     }, []);
 
     useEffect(() => onPowProgress(setProgress), []);
+
+    // A click on an expiry reminder opens the extend options of the room.
+    useEffect(() => {
+        const takeReminder = () => roomsApi.takeReminder().then(r => {
+            if (r.ok && r.value) {
+                setExtendOpen(r.value);
+                // The navbar compares the open drawer with the connected component.
+                // eslint-disable-next-line @typescript-eslint/no-use-before-define
+                dispatch(openDrawer(ConnectedMyRoomsDrawer));
+            }
+        });
+
+        takeReminder();
+
+        return onOpenExtend(takeReminder);
+    }, []);
 
     useEffect(() => {
         if (!isOpen) {
@@ -278,4 +294,6 @@ function MyRoomsDrawer({ dispatch, isOpen, t }: IProps) {
     );
 }
 
-export default compose(connect(), withTranslation())(MyRoomsDrawer) as React.ComponentType<any>;
+const ConnectedMyRoomsDrawer = compose(connect(), withTranslation())(MyRoomsDrawer) as React.ComponentType<any>;
+
+export default ConnectedMyRoomsDrawer;
