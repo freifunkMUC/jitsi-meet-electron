@@ -12,6 +12,7 @@
     "lint": "eslint . --ext .js,.ts,.tsx",
     "lint-fix": "eslint . --ext .js,.ts,.tsx --fix",
     "type-check": "tsc --noEmit",
+    "test": "node --import tsx --test \"app/**/*.test.ts\"",
     "build": "npm run type-check && node ./esbuild.js",
     "dist": "npm run build && electron-builder",
     "postinstall": "patch-package",
@@ -176,6 +177,7 @@
     "redux-persist": "^5.10.0",
     "source-map-support": "^0.5.19",
     "styled-components": "^3.4.10",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   },
   "overrides": {
