@@ -41,6 +41,77 @@
 			"replaced": "This link was replaced by new links. Ask the room owner for the new link.",
 			"too_many_requests": "Too many requests. Wait some minutes and try again.",
 			"unknown": "The room is unknown or the link is not a host link."
+		},
+		"myRooms": "My rooms",
+		"refresh": "Refresh",
+		"notPersistent": "This computer cannot encrypt saved data. Your rooms are kept only until you close the app. Save the manage links in a safe place.",
+		"create": "New room",
+		"createButton": "Reserve",
+		"working": "Security check in progress. This can take some seconds.",
+		"import": "Add a room",
+		"importPlaceholder": "Paste a manage link or host link",
+		"importButton": "Add",
+		"empty": "You have no rooms. Reserve a new room or add a room from a link.",
+		"created": "Room {{room}} is reserved.",
+		"imported": "Room {{room}} was added.",
+		"copied": "Copied to the clipboard.",
+		"extended": "The room was extended.",
+		"rotated": "New links are ready. The old links do not work anymore.",
+		"status": {
+			"active": "Active",
+			"deleted": "Deleted",
+			"expired": "Expired",
+			"replaced": "Links replaced",
+			"unknown": "Unknown"
+		},
+		"expires": "Expires on {{date}}",
+		"expired": "Expired on {{date}}",
+		"joinAsHost": "Join as host",
+		"extend": "Extend",
+		"extendUntil": "{{duration}} (until {{date}})",
+		"duration": {
+			"label": "Duration",
+			"hours": "{{count}} hour",
+			"hours_plural": "{{count}} hours",
+			"days": "{{count}} day",
+			"days_plural": "{{count}} days",
+			"weeks": "{{count}} week",
+			"weeks_plural": "{{count}} weeks",
+			"years": "{{count}} year",
+			"years_plural": "{{count}} years"
+		},
+		"copy": "Copy link:",
+		"copyHint": {
+			"host": "Host link: join with moderator rights",
+			"speaker": "Speaker link: join and talk",
+			"viewer": "Viewer link: watch only",
+			"manage": "Manage link: extend, renew or delete the room. Keep it secret.",
+			"all": "All links as text"
+		},
+		"links": {
+			"host": "Host",
+			"speaker": "Speaker",
+			"viewer": "Viewer",
+			"manage": "Manage",
+			"all": "All"
+		},
+		"copyAllHeader": "Room {{room}}",
+		"rotate": "New links",
+		"delete": "Delete",
+		"remove": "Remove from list",
+		"removeHint": "Remove the room from this list. The room stays reserved.",
+		"confirm": {
+			"cancel": "Cancel",
+			"rotate": {
+				"message": "Make new links for {{room}}?",
+				"detail": "The old host, speaker and manage links stop working. Send the new links to your participants.",
+				"ok": "Make new links"
+			},
+			"delete": {
+				"message": "Delete room {{room}}?",
+				"detail": "The room and all links stop working. You cannot undo this.",
+				"ok": "Delete"
+			}
 		}
 	}
 }

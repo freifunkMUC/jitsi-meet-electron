@@ -1,8 +1,20 @@
 import { createHash } from 'crypto';
-import { WebContents, ipcMain } from 'electron';
+import { BrowserWindow, WebContents, app, clipboard, dialog, ipcMain, safeStorage } from 'electron';
+import path from 'path';
 
-import { JoinCache, ReserveClient, ReserveError, parseReserveLink } from '../client';
-import { IReserveConference, RESERVE_INVOKE_CHANNELS, ReserveIpcResult } from '../types';
+import { t } from '../../../i18n/main';
+import config from '../../config';
+import { DEFAULT_BASE_PATH, JoinCache, ReserveClient, ReserveError, parseReserveLink } from '../client';
+import {
+    IReserveConference,
+    RESERVE_EVENTS,
+    RESERVE_INVOKE_CHANNELS,
+    ReserveIpcResult,
+    RoomLinkKind
+} from '../types';
+
+import { RoomsService } from './rooms';
+import { IEncryptor, RoomStore } from './store';
 
 /**
  * Native SHA-256 for the proof of work. Faster than the pure JS one.
@@ -71,18 +83,184 @@ export async function resolveReserveJoin(input: string): Promise<IReserveConfere
 }
 
 /**
+ * Electron safeStorage as room store encryption. On Linux without a secret
+ * service, Electron uses a fixed key ("basic_text"); that is not secure, so the
+ * app does not write secrets then.
+ */
+const safeStorageEncryptor: IEncryptor = {
+    decryptString: data => safeStorage.decryptString(data),
+    encryptString: text => safeStorage.encryptString(text),
+    isAvailable: () => safeStorage.isEncryptionAvailable()
+        && !(process.platform === 'linux' && safeStorage.getSelectedStorageBackend?.() === 'basic_text')
+};
+
+let rooms: Promise<RoomsService> | undefined;
+
+/**
+ * The rooms service. Loads the store on first use (after app ready).
+ *
+ * @returns {Promise<RoomsService>}
+ */
+export function getRoomsService(): Promise<RoomsService> {
+    if (!rooms) {
+        rooms = app.whenReady().then(async () => {
+            const store = new RoomStore(path.join(app.getPath('userData'), 'reserve-rooms.bin'), safeStorageEncryptor);
+
+            await store.load();
+
+            return new RoomsService(
+                store, createReserveClient(`${config.defaultServerURL}${DEFAULT_BASE_PATH}`), joinCache);
+        });
+    }
+
+    return rooms;
+}
+
+export interface IReserveMainOptions {
+
+    /**
+     * Returns true for the launcher window. Other senders get an error.
+     */
+    isTrustedSender: (sender: WebContents) => boolean;
+
+    /**
+     * Parent window of confirmation dialogs.
+     */
+    parentWindow: () => BrowserWindow | null;
+}
+
+/**
+ * Asks the user to confirm an action that cannot be undone.
+ *
+ * @param {BrowserWindow|null} parent - Parent window.
+ * @param {string} action - Translation key below reserve.confirm.
+ * @param {string} room - Room name.
+ * @returns {Promise<boolean>}
+ */
+async function confirm(parent: BrowserWindow | null, action: 'delete' | 'rotate', room: string): Promise<boolean> {
+    const options = {
+        buttons: [ t(`reserve.confirm.${action}.ok`), t('reserve.confirm.cancel') ],
+        cancelId: 1,
+        defaultId: 1,
+        detail: t(`reserve.confirm.${action}.detail`),
+        message: t(`reserve.confirm.${action}.message`, { room }),
+        noLink: true,
+        type: 'warning' as const
+    };
+    const { response } = parent ? await dialog.showMessageBox(parent, options) : await dialog.showMessageBox(options);
+
+    return response === 0;
+}
+
+/**
  * Registers the IPC handlers of the reserve feature.
  *
- * @param {Function} isTrustedSender - Returns true for the launcher window. Other
- * senders get an error.
+ * @param {IReserveMainOptions} options - Options.
  * @returns {void}
  */
-export function setupReserveMain(isTrustedSender: (sender: WebContents) => boolean): void {
-    ipcMain.handle(RESERVE_INVOKE_CHANNELS.join, (event, input: unknown) => {
-        if (!isTrustedSender(event.sender)) {
-            return { ok: false, reason: 'invalid' };
+export function setupReserveMain({ isTrustedSender, parentWindow }: IReserveMainOptions): void {
+    let pow: { aborted: boolean; } | undefined;
+
+    const handle = <T>(channel: string, fn: (sender: WebContents, ...args: any[]) => Promise<T>) => {
+        ipcMain.handle(channel, (event, ...args) => {
+            if (!isTrustedSender(event.sender)) {
+                return { ok: false, reason: 'invalid' };
+            }
+
+            return toIpcResult(() => fn(event.sender, ...args));
+        });
+    };
+
+    const withPow = <T>(sender: WebContents, fn: (opts: object) => Promise<T>) => {
+        if (pow) {
+            pow.aborted = true;
+        }
+        const signal = { aborted: false };
+
+        pow = signal;
+
+        return fn({
+            onProgress: (tried: number, expected: number) => {
+                if (!sender.isDestroyed()) {
+                    sender.send(RESERVE_EVENTS.powProgress, { expected, tried });
+                }
+            },
+            signal
+        }).finally(() => {
+            if (pow === signal) {
+                pow = undefined;
+            }
+        });
+    };
+
+    const hours = (h: unknown) => {
+        if (typeof h !== 'number' || !Number.isInteger(h) || h <= 0) {
+            throw new ReserveError('malformed', 0, 'bad duration');
         }
 
-        return toIpcResult(() => resolveReserveJoin(String(input ?? '')));
+        return h;
+    };
+
+    handle(RESERVE_INVOKE_CHANNELS.join, async (_s, input: unknown) => resolveReserveJoin(String(input ?? '')));
+    handle(RESERVE_INVOKE_CHANNELS.list, async () => (await getRoomsService()).list());
+    handle(RESERVE_INVOKE_CHANNELS.refresh, async (_s, force: unknown) =>
+        (await getRoomsService()).refresh(force === true));
+    handle(RESERVE_INVOKE_CHANNELS.durations, async () => (await getRoomsService()).durations());
+    handle(RESERVE_INVOKE_CHANNELS.cancel, async () => {
+        if (pow) {
+            pow.aborted = true;
+        }
+    });
+    handle(RESERVE_INVOKE_CHANNELS.create, async (sender, h: unknown) => {
+        const service = await getRoomsService();
+
+        return withPow(sender, opts => service.create(hours(h), opts));
+    });
+    handle(RESERVE_INVOKE_CHANNELS.extend, async (sender, room: unknown, h: unknown) => {
+        const service = await getRoomsService();
+
+        return withPow(sender, opts => service.extend(String(room), hours(h), opts));
+    });
+    handle(RESERVE_INVOKE_CHANNELS.import, async (_s, link: unknown) =>
+        (await getRoomsService()).importLink(String(link ?? '')));
+    handle(RESERVE_INVOKE_CHANNELS.rotate, async (_s, room: unknown) => {
+        if (!await confirm(parentWindow(), 'rotate', String(room))) {
+            return null;
+        }
+
+        return (await getRoomsService()).rotate(String(room));
+    });
+    handle(RESERVE_INVOKE_CHANNELS.delete, async (_s, room: unknown) => {
+        if (!await confirm(parentWindow(), 'delete', String(room))) {
+            return null;
+        }
+
+        return (await getRoomsService()).delete(String(room));
+    });
+    handle(RESERVE_INVOKE_CHANNELS.remove, async (_s, room: unknown) =>
+        (await getRoomsService()).remove(String(room)));
+    handle(RESERVE_INVOKE_CHANNELS.joinRoom, async (_s, room: unknown) =>
+        (await getRoomsService()).join(String(room)));
+    handle(RESERVE_INVOKE_CHANNELS.copy, async (_s, room: unknown, kind: unknown) => {
+        const links = await (await getRoomsService()).links(String(room));
+        const k = kind as RoomLinkKind;
+        let text: string;
+
+        if (k === 'all') {
+            text = [
+                t('reserve.copyAllHeader', { room: String(room) }),
+                `${t('reserve.links.host')}: ${links.host}`,
+                `${t('reserve.links.speaker')}: ${links.speaker}`,
+                `${t('reserve.links.viewer')}: ${links.viewer}`,
+                `${t('reserve.links.manage')}: ${links.manage}`
+            ].join('\n');
+        } else if (k === 'host' || k === 'manage' || k === 'speaker' || k === 'viewer') {
+            text = links[k];
+        } else {
+            throw new ReserveError('malformed', 0, 'bad link kind');
+        }
+        clipboard.writeText(text);
+
+        return true;
     });
 }

@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import type { IState } from '../../../types';
+import { MyRoomsButton, MyRoomsDrawer } from '../../reserve/components';
 import { SettingsButton, SettingsDrawer } from '../../settings';
 
 import HelpButton from './HelpButton';
@@ -43,6 +44,7 @@ const NavItem = styled.div`
 `;
 
 interface IProps {
+    _isMyRoomsDrawerOpen?: boolean;
     _isSettingsDrawerOpen?: boolean;
 }
 
@@ -65,6 +67,9 @@ class Navbar extends Component<IProps> {
                             <Logo />
                         </NavItem>
                         <NavItem>
+                            <MyRoomsButton />
+                        </NavItem>
+                        <NavItem>
                             <SettingsButton />
                         </NavItem>
                     </NavSection>
@@ -75,6 +80,7 @@ class Navbar extends Component<IProps> {
                     </NavSection>
                 </NavBar>
                 <SettingsDrawer isOpen = { this.props._isSettingsDrawerOpen } />
+                <MyRoomsDrawer isOpen = { this.props._isMyRoomsDrawerOpen } />
             </>
         );
     }
@@ -85,11 +91,13 @@ class Navbar extends Component<IProps> {
  *
  * @param {Object} state - The redux state.
  * @returns {{
+ *     _isMyRoomsDrawerOpen,
  *     _isSettingsDrawerOpen
  * }}
  */
 function _mapStateToProps(state: IState) {
     return {
+        _isMyRoomsDrawerOpen: state.navbar.openDrawer === MyRoomsDrawer,
         _isSettingsDrawerOpen: state.navbar.openDrawer === SettingsDrawer
     };
 }

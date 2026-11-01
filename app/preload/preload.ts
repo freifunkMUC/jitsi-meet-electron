@@ -1,7 +1,7 @@
 import { install as installJitsiElectronSdk } from '@jitsi/electron-sdk/preload';
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 
-import { RESERVE_INVOKE_CHANNELS } from '../features/reserve/types';
+import { RESERVE_EVENTS, RESERVE_INVOKE_CHANNELS } from '../features/reserve/types';
 
 // Expose the SDK's own bridge (window.jitsiElectronSDK, an SDK-internal detail
 // the renderer helpers read) before wiring up our own bridge below.
@@ -14,7 +14,8 @@ const whitelistedIpcChannels = [
     'open-meeting-window',
     'close-meeting-window',
     'navigate-to-conference',
-    'set-default-server'
+    'set-default-server',
+    ...Object.values(RESERVE_EVENTS)
 ];
 
 const whitelistedInvokeChannels: string[] = Object.values(RESERVE_INVOKE_CHANNELS);

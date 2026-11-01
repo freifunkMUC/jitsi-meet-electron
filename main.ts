@@ -537,7 +537,10 @@ for (const appProtocolPrefix of config.appProtocolPrefixes) {
 }
 
 // Reserve API calls run here; the service does not allow cross-origin calls.
-setupReserveMain(sender => Boolean(mainWindow) && sender === mainWindow?.webContents);
+setupReserveMain({
+    isTrustedSender: sender => Boolean(mainWindow) && sender === mainWindow?.webContents,
+    parentWindow: () => mainWindow
+});
 
 /**
  * This is for mac [darwin]

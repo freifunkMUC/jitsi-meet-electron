@@ -41,6 +41,77 @@
 			"replaced": "Dieser Link wurde durch neue Links ersetzt. Frage die Person, die den Raum verwaltet, nach dem neuen Link.",
 			"too_many_requests": "Zu viele Anfragen. Warte einige Minuten und versuche es erneut.",
 			"unknown": "Der Raum ist unbekannt oder der Link ist kein Host-Link."
+		},
+		"myRooms": "Meine Räume",
+		"refresh": "Aktualisieren",
+		"notPersistent": "Dieser Computer kann gespeicherte Daten nicht verschlüsseln. Deine Räume bleiben nur bis zum Schließen der App erhalten. Bewahre die Verwaltungslinks sicher auf.",
+		"create": "Neuer Raum",
+		"createButton": "Reservieren",
+		"working": "Sicherheitsprüfung läuft. Das kann einige Sekunden dauern.",
+		"import": "Raum hinzufügen",
+		"importPlaceholder": "Verwaltungslink oder Host-Link einfügen",
+		"importButton": "Hinzufügen",
+		"empty": "Du hast keine Räume. Reserviere einen neuen Raum oder füge einen Raum über einen Link hinzu.",
+		"created": "Raum {{room}} ist reserviert.",
+		"imported": "Raum {{room}} wurde hinzugefügt.",
+		"copied": "In die Zwischenablage kopiert.",
+		"extended": "Der Raum wurde verlängert.",
+		"rotated": "Neue Links sind bereit. Die alten Links funktionieren nicht mehr.",
+		"status": {
+			"active": "Aktiv",
+			"deleted": "Gelöscht",
+			"expired": "Abgelaufen",
+			"replaced": "Links ersetzt",
+			"unknown": "Unbekannt"
+		},
+		"expires": "Läuft ab am {{date}}",
+		"expired": "Abgelaufen am {{date}}",
+		"joinAsHost": "Als Host beitreten",
+		"extend": "Verlängern",
+		"extendUntil": "{{duration}} (bis {{date}})",
+		"duration": {
+			"label": "Dauer",
+			"hours": "{{count}} Stunde",
+			"hours_plural": "{{count}} Stunden",
+			"days": "{{count}} Tag",
+			"days_plural": "{{count}} Tage",
+			"weeks": "{{count}} Woche",
+			"weeks_plural": "{{count}} Wochen",
+			"years": "{{count}} Jahr",
+			"years_plural": "{{count}} Jahre"
+		},
+		"copy": "Link kopieren:",
+		"copyHint": {
+			"host": "Host-Link: mit Moderationsrechten beitreten",
+			"speaker": "Sprecher-Link: beitreten und sprechen",
+			"viewer": "Zuschauer-Link: nur zusehen",
+			"manage": "Verwaltungslink: Raum verlängern, erneuern oder löschen. Halte ihn geheim.",
+			"all": "Alle Links als Text"
+		},
+		"links": {
+			"host": "Host",
+			"speaker": "Sprecher",
+			"viewer": "Zuschauer",
+			"manage": "Verwalten",
+			"all": "Alle"
+		},
+		"copyAllHeader": "Raum {{room}}",
+		"rotate": "Neue Links",
+		"delete": "Löschen",
+		"remove": "Aus Liste entfernen",
+		"removeHint": "Entfernt den Raum nur aus dieser Liste. Der Raum bleibt reserviert.",
+		"confirm": {
+			"cancel": "Abbrechen",
+			"rotate": {
+				"message": "Neue Links für {{room}} erstellen?",
+				"detail": "Die alten Host-, Sprecher- und Verwaltungslinks funktionieren dann nicht mehr. Sende die neuen Links an die Teilnehmenden.",
+				"ok": "Neue Links erstellen"
+			},
+			"delete": {
+				"message": "Raum {{room}} löschen?",
+				"detail": "Der Raum und alle Links funktionieren dann nicht mehr. Das kann nicht rückgängig gemacht werden.",
+				"ok": "Löschen"
+			}
 		}
 	}
 }
