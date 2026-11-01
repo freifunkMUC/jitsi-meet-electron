@@ -1,4 +1,5 @@
 import type { IConference } from '../../types';
+import { parseReserveLink } from '../reserve/client/links';
 
 
 /**
@@ -37,6 +38,12 @@ export function openExternalLink(link: string): void {
  * @returns {IConference|undefined}
  */
 export function createConferenceObjectFromURL(inputURL: string, defaultServerURL: string): IConference | undefined {
+    // Reserve links carry a secret, not a room name. Callers resolve them with
+    // joinReserveLink() instead.
+    if (parseReserveLink(inputURL)) {
+        return;
+    }
+
     const lastIndexOfSlash = inputURL.lastIndexOf('/');
     let room;
     let serverURL;

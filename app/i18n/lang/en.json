@@ -23,5 +23,24 @@
 		"detail": "A meeting participant is requesting control of your mouse and keyboard.",
 		"allow": "Allow",
 		"deny": "Deny"
+	},
+	"reserve": {
+		"joining": "Joining…",
+		"joinFailed": "Could not join the reserved room.",
+		"errors": {
+			"aborted": "The operation was stopped.",
+			"deleted": "The room was deleted.",
+			"expired": "The room reservation expired.",
+			"forbidden": "This link cannot join with this role.",
+			"internal": "The server has a problem. Try again later.",
+			"invalid": "The link is not valid.",
+			"malformed": "The request is not valid.",
+			"network": "Cannot connect to the server. Check your network connection.",
+			"not_supported": "The server does not support this operation.",
+			"pow": "The security check failed. Try again.",
+			"replaced": "This link was replaced by new links. Ask the room owner for the new link.",
+			"too_many_requests": "Too many requests. Wait some minutes and try again.",
+			"unknown": "The room is unknown or the link is not a host link."
+		}
 	}
 }

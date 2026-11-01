@@ -24,6 +24,8 @@ import * as path from 'path';
 import * as URL from 'url';
 
 import config from './app/features/config';
+import { parseReserveLink } from './app/features/reserve/client/links';
+import { resolveReserveJoin, setupReserveMain, toIpcResult } from './app/features/reserve/main';
 import { openExternalLink } from './app/features/utils/openExternalLink';
 import { t } from './app/i18n/main';
 import pkgJson from './package.json';
@@ -124,7 +126,7 @@ let webrtcInternalsWindow: BrowserWindow | null = null;
 /**
  * Add protocol data
  */
-const appProtocolSurplus = `${config.appProtocolPrefix}://`;
+const appProtocolSurpluses = config.appProtocolPrefixes.map(prefix => `${prefix}://`);
 let rendererReady = false;
 let protocolDataForFrontApp: string | null = null;
 
@@ -379,16 +381,26 @@ function createWebRTCInternalsWindow() {
  * @returns {void}
  */
 function handleProtocolCall(fullProtocolCall?: string) {
+    const appProtocolSurplus = appProtocolSurpluses.find(
+        surplus => fullProtocolCall?.toLowerCase().startsWith(surplus));
+
     // don't touch when something is bad
     if (
         !fullProtocolCall
         || fullProtocolCall.trim() === ''
-        || fullProtocolCall.indexOf(appProtocolSurplus) !== 0
+        || !appProtocolSurplus
     ) {
         return;
     }
 
-    const inputURL = fullProtocolCall.replace(appProtocolSurplus, '');
+    const inputURL = fullProtocolCall.substring(appProtocolSurplus.length);
+
+    // Reserve links hold a secret, not a room name: get a token and join.
+    if (parseReserveLink(inputURL)) {
+        app.whenReady().then(() => joinReserveLink(inputURL));
+
+        return;
+    }
 
     if (meetingWindow) {
         meetingWindow.webContents.send('protocol-data-msg', inputURL);
@@ -406,6 +418,39 @@ function handleProtocolCall(fullProtocolCall?: string) {
         mainWindow
             .webContents
             .send('protocol-data-msg', inputURL);
+    }
+}
+
+/**
+ * Joins a reserved room from a reserve link. Shows a native error if the link
+ * does not work.
+ *
+ * @param {string} inputURL - The reserve link.
+ * @returns {Promise<void>}
+ */
+async function joinReserveLink(inputURL: string) {
+    if (mainWindow === null) {
+        createJitsiMeetWindow();
+    }
+
+    const result = await toIpcResult(() => resolveReserveJoin(inputURL));
+
+    if (result.ok) {
+        openMeetingWindow(result.value);
+
+        return;
+    }
+
+    const options = {
+        type: 'error' as const,
+        message: t('reserve.joinFailed'),
+        detail: t(`reserve.errors.${result.reason}`)
+    };
+
+    if (mainWindow) {
+        dialog.showMessageBox(mainWindow, options);
+    } else {
+        dialog.showMessageBox(options);
     }
 }
 
@@ -473,21 +518,26 @@ app.on('window-all-closed', () => {
     app.quit();
 });
 
-// remove so we can register each time as we run the app.
-app.removeAsDefaultProtocolClient(config.appProtocolPrefix);
+for (const appProtocolPrefix of config.appProtocolPrefixes) {
+    // remove so we can register each time as we run the app.
+    app.removeAsDefaultProtocolClient(appProtocolPrefix);
 
-// If we are running a non-packaged version of the app && on windows
-if (isDev && process.platform === 'win32') {
-    // Set the path of electron.exe and your app.
-    // These two additional parameters are only available on windows.
-    app.setAsDefaultProtocolClient(
-        config.appProtocolPrefix,
-        process.execPath,
-        [ path.resolve(process.argv[1]) ]
-    );
-} else {
-    app.setAsDefaultProtocolClient(config.appProtocolPrefix);
+    // If we are running a non-packaged version of the app && on windows
+    if (isDev && process.platform === 'win32') {
+        // Set the path of electron.exe and your app.
+        // These two additional parameters are only available on windows.
+        app.setAsDefaultProtocolClient(
+            appProtocolPrefix,
+            process.execPath,
+            [ path.resolve(process.argv[1]) ]
+        );
+    } else {
+        app.setAsDefaultProtocolClient(appProtocolPrefix);
+    }
 }
+
+// Reserve API calls run here; the service does not allow cross-origin calls.
+setupReserveMain(sender => Boolean(mainWindow) && sender === mainWindow?.webContents);
 
 /**
  * This is for mac [darwin]
@@ -574,8 +624,11 @@ async function requestRemoteControlConsent(): Promise<boolean> {
  * Open the meeting in Window 2.
  * If a meeting window already exists, focus it and navigate to the new conference.
  * Otherwise create a new one.
+ *
+ * @param {Object} conference - The conference to join.
+ * @returns {void}
  */
-ipcMain.on('open-meeting-window', (event, conference) => {
+function openMeetingWindow(conference: unknown) {
     if (meetingWindow) {
         meetingWindow.focus();
         meetingWindow.webContents.send('navigate-to-conference', conference);
@@ -655,7 +708,9 @@ ipcMain.on('open-meeting-window', (event, conference) => {
     meetingWindow.once('ready-to-show', () => {
         meetingWindow?.show();
     });
-});
+}
+
+ipcMain.on('open-meeting-window', (event, conference) => openMeetingWindow(conference));
 
 /**
  * Close the meeting window — called by renderer when End Call is clicked.

@@ -107,6 +107,7 @@
         "name": "jitsi-protocol",
         "role": "Viewer",
         "schemes": [
+          "ffmuc-meet",
           "jitsi-meet"
         ]
       }

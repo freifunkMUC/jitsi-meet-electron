@@ -10,6 +10,7 @@ import type { IState } from '../../../types';
 import config from '../../config';
 import { Navbar } from '../../navbar';
 import { RecentList, addRecentListEntry } from '../../recent-list';
+import { joinReserveLink, parseReserveLink } from '../../reserve';
 import Button from '../../shared/components/Button';
 import FieldText from '../../shared/components/FieldText';
 import Page from '../../shared/components/Page';
@@ -27,6 +28,12 @@ const MainGoButton = styled(Button)`
     height: 3em;
 `;
 
+const ErrorText = styled.div`
+    color: #ff8f73;
+    margin-top: 8px;
+    text-align: center;
+`;
+
 interface IProps extends WithTranslation {
     _serverURL?: string;
     dispatch: Dispatch;
@@ -42,6 +49,8 @@ interface IProps extends WithTranslation {
 interface IWelcomeState {
     animateTimeoutId?: ReturnType<typeof setTimeout>;
     generatedRoomname: string;
+    reserveError?: string;
+    reserveJoining: boolean;
     roomPlaceholder: string;
     updateTimeoutId?: ReturnType<typeof setTimeout>;
     url: string;
@@ -75,6 +84,8 @@ class Welcome extends Component<IProps, IWelcomeState> {
         this.state = {
             animateTimeoutId: undefined,
             generatedRoomname: '',
+            reserveError: undefined,
+            reserveJoining: false,
             roomPlaceholder: '',
             updateTimeoutId: undefined,
             url
@@ -181,6 +192,13 @@ class Welcome extends Component<IProps, IWelcomeState> {
      */
     _onJoin() {
         const inputURL = this.state.url || this.state.generatedRoomname;
+
+        if (parseReserveLink(inputURL)) {
+            this._joinReserveLink(inputURL);
+
+            return;
+        }
+
         const conference = createConferenceObjectFromURL(
             inputURL,
             this.props._serverURL || config.defaultServerURL
@@ -197,6 +215,33 @@ class Welcome extends Component<IProps, IWelcomeState> {
 
 
     /**
+     * Joins a reserved room from a host, speaker or manage link. The link holds
+     * a secret, so it is not added to the recent list.
+     *
+     * @param {string} inputURL - The reserve link.
+     * @returns {Promise<void>}
+     */
+    async _joinReserveLink(inputURL: string) {
+        if (this.state.reserveJoining) {
+            return;
+        }
+        this.setState({ reserveError: undefined, reserveJoining: true });
+
+        const result = await joinReserveLink(inputURL);
+
+        this.setState({ reserveJoining: false });
+
+        if (!result.ok) {
+            this.setState({ reserveError: result.reason });
+
+            return;
+        }
+
+        this.setState({ url: '' });
+        window.jitsiElectronApp.ipc.send('open-meeting-window', result.value);
+    }
+
+    /**
      * Keeps URL input value and URL in state in sync.
      *
      * @param {SyntheticInputEvent<HTMLInputElement>} event - Event by which
@@ -205,6 +250,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
      */
     _onURLChange(event: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
+            reserveError: undefined,
             url: event.currentTarget.value
         });
     }
@@ -231,6 +277,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
         const locationState = this.props.location?.state;
         const locationError = locationState?.error;
         const { t } = this.props;
+        const { reserveError, reserveJoining } = this.state;
 
         return (
             <Header>
@@ -238,7 +285,7 @@ class Welcome extends Component<IProps, IWelcomeState> {
                     <Label>{ t('enterConferenceNameOrUrl') } </Label>
                     <MainFieldText
                         autoFocus = { true }
-                        isInvalid = { locationError }
+                        isInvalid = { Boolean(locationError || reserveError) }
                         isLabelHidden = { true }
                         onChange = { this._onURLChange }
                         placeholder = { this.state.roomPlaceholder }
@@ -247,10 +294,16 @@ class Welcome extends Component<IProps, IWelcomeState> {
                         value = { this.state.url } />
                     <MainGoButton
                         appearance = 'primary'
+                        disabled = { reserveJoining }
                         onClick = { this._onJoin }
                         type = 'button'>
-                        { t('go') }
+                        { reserveJoining ? t('reserve.joining') : t('go') }
                     </MainGoButton>
+                    { reserveError && (
+                        <ErrorText role = 'alert'>
+                            { t('reserve.joinFailed') } { t(`reserve.errors.${reserveError}`) }
+                        </ErrorText>
+                    ) }
                 </Form>
             </Header>
         );

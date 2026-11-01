@@ -6,6 +6,11 @@ import type { ComponentType } from 'react';
  */
 export interface IConference {
     endTime?: number;
+
+    /**
+     * Token for a reserved room. Kept in memory only; never persisted.
+     */
+    jwt?: string;
     room: string;
     serverURL: string;
     startTime?: number;

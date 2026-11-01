@@ -23,5 +23,24 @@
 		"detail": "Ein Konferenzteilnehmer möchte Maus und Tastatur dieses Computers steuern.",
 		"allow": "Zulassen",
 		"deny": "Ablehnen"
+	},
+	"reserve": {
+		"joining": "Verbinde…",
+		"joinFailed": "Beitritt zum reservierten Raum nicht möglich.",
+		"errors": {
+			"aborted": "Der Vorgang wurde abgebrochen.",
+			"deleted": "Der Raum wurde gelöscht.",
+			"expired": "Die Raumreservierung ist abgelaufen.",
+			"forbidden": "Mit diesem Link ist diese Rolle nicht erlaubt.",
+			"internal": "Der Server hat ein Problem. Versuche es später erneut.",
+			"invalid": "Der Link ist ungültig.",
+			"malformed": "Die Anfrage ist ungültig.",
+			"network": "Keine Verbindung zum Server. Prüfe deine Netzwerkverbindung.",
+			"not_supported": "Der Server unterstützt diesen Vorgang nicht.",
+			"pow": "Die Sicherheitsprüfung ist fehlgeschlagen. Versuche es erneut.",
+			"replaced": "Dieser Link wurde durch neue Links ersetzt. Frage die Person, die den Raum verwaltet, nach dem neuen Link.",
+			"too_many_requests": "Zu viele Anfragen. Warte einige Minuten und versuche es erneut.",
+			"unknown": "Der Raum ist unbekannt oder der Link ist kein Host-Link."
+		}
 	}
 }

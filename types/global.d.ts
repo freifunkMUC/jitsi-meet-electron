@@ -7,6 +7,7 @@ export {};
 interface IJitsiElectronApp {
     ipc: {
         addListener(channel: string, listener: (...args: any[]) => void): (() => void) | undefined;
+        invoke(channel: string, ...args: any[]): Promise<any>;
         send(channel: string, ...args: any[]): void;
     };
     openExternalLink(url: string): void;

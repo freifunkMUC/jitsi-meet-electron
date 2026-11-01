@@ -16,10 +16,10 @@ export default {
     appName: 'FreifunkMeet',
 
     /**
-    * The prefix for application protocol.
-    * You will also need to replace this in package.json.
+    * The prefixes for application protocols. The app registers all of them.
+    * You will also need to replace these in package.json.
     */
-    appProtocolPrefix: 'jitsi-meet',
+    appProtocolPrefixes: [ 'ffmuc-meet', 'jitsi-meet' ],
 
     /**
      * The default server URL of Jitsi Meet Deployment that will be used.
