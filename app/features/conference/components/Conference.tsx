@@ -133,11 +133,13 @@ class Conference extends Component<IProps, IConferenceState> {
      * @returns {void}
      */
     _loadConference() {
-        const appProtocolSurplus = `${config.appProtocolPrefix}://`;
-
         // replace the custom url with https, otherwise new URL() raises 'Invalid URL'.
-        if (this._conference.serverURL.startsWith(appProtocolSurplus)) {
-            this._conference.serverURL = this._conference.serverURL.replace(appProtocolSurplus, 'https://');
+        for (const prefix of config.appProtocolPrefixes) {
+            const appProtocolSurplus = `${prefix}://`;
+
+            if (this._conference.serverURL.startsWith(appProtocolSurplus)) {
+                this._conference.serverURL = this._conference.serverURL.replace(appProtocolSurplus, 'https://');
+            }
         }
         const url = new URL(this._conference.room, this._conference.serverURL);
         const roomName = url.pathname.split('/').pop();
@@ -164,7 +166,7 @@ class Conference extends Component<IProps, IConferenceState> {
         const interfaceConfigOverwrite = {
             SHOW_CHROME_EXTENSION_BANNER: false
         };
-        let jwt = jwtFromSearch;
+        let jwt = this.props.conference.jwt ?? jwtFromSearch;
 
         Object.entries(hashParameters).forEach(([ key, value ]) => {
             if (key.startsWith('config.')) {

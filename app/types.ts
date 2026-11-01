@@ -6,6 +6,11 @@ import type { ComponentType } from 'react';
  */
 export interface IConference {
     endTime?: number;
+
+    /**
+     * Token for a reserved room. Kept in memory only; never persisted.
+     */
+    jwt?: string;
     room: string;
     serverURL: string;
     startTime?: number;
@@ -28,11 +33,17 @@ export interface IRecentListState {
 /**
  * Redux state of the settings feature.
  */
+/**
+ * Colour theme. "system" follows the operating system.
+ */
+export type ThemeSource = 'dark' | 'light' | 'system';
+
 export interface ISettingsState {
     alwaysOnTopWindowEnabled: boolean;
     disableAGC: boolean;
     serverTimeout?: number;
     serverURL?: string;
+    theme?: ThemeSource;
 }
 
 /**

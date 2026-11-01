@@ -63,7 +63,6 @@ class SettingsButton extends Component<IProps> {
     render() {
         return (
             <SettingsIcon
-                color = 'white'
                 onClick = { this._onIconClick }
                 size = { 24 } />
         );

@@ -2,131 +2,216 @@ import React, { Component } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Dispatch, compose } from 'redux';
+import styled from 'styled-components';
 
 import type { IConference, IState } from '../../../types';
-import Button from '../../shared/components/Button';
+import config from '../../config';
+import { MyRoomsDrawer } from '../../reserve/components';
+import { Badge, Muted, Notice, SmallButton } from '../../reserve/components/styled';
+import { roomsApi } from '../../reserve/ipc';
+import Card, { CardTitle } from '../../shared/components/Card';
 import { CrossIcon } from '../../shared/icons';
+import { sameServer, serverHost } from '../../welcome/functions';
 import { addRecentListEntry, removeRecentListEntry } from '../actions';
-import {
-    ConferenceCard,
-    ConferenceTitle,
-    Label,
-    RecentListContainer,
-    RecentListWrapper,
-    TruncatedText
-} from '../styled';
+
+const Row = styled.div`
+    align-items: center;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 12px;
+    padding-top: 10px;
+`;
+
+const Text = styled.div`
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+`;
+
+const Name = styled.span`
+    align-items: center;
+    display: flex;
+    font-weight: 700;
+    gap: 8px;
+    min-width: 0;
+
+    span:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+`;
+
+const RemoveButton = styled.button`
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    padding: 6px;
+
+    &:hover {
+        background: var(--hover);
+        color: var(--text);
+    }
+`;
 
 interface IProps extends WithTranslation {
+    _drawerOpen?: boolean;
     _recentList?: IConference[];
     dispatch: Dispatch;
 }
 
+interface IRecentState {
+    busy: boolean;
+    error?: string;
+    myRooms: string[];
+}
+
 /**
- * Recent List Component.
+ * Recent meetings card on the welcome page.
  */
-class RecentList extends Component<IProps> {
+class RecentList extends Component<IProps, IRecentState> {
+    state: IRecentState = { busy: false, myRooms: [] };
+
+    /**
+     * Loads the names of the rooms in "My rooms" to find reserved rooms.
+     *
+     * @returns {void}
+     */
+    componentDidMount() {
+        this._loadMyRooms();
+    }
+
+    /**
+     * Loads "My rooms" again when its drawer closes.
+     *
+     * @param {IProps} prevProps - Previous props.
+     * @returns {void}
+     */
+    componentDidUpdate(prevProps: IProps) {
+        if (prevProps._drawerOpen && !this.props._drawerOpen) {
+            this._loadMyRooms();
+        }
+    }
+
     /**
      * Render function of component.
      *
      * @returns {ReactElement}
      */
     render() {
-        const { t } = this.props;
+        const { _recentList, t } = this.props;
 
-        if (this.props._recentList?.length === 0) {
+        if (!_recentList?.length) {
             return null;
         }
 
         return (
-            <RecentListWrapper>
-                <Label>{t('recentListLabel')}</Label>
-                <RecentListContainer>
-                    {
-                        this.props._recentList?.map(
-                            conference => this._renderRecentListEntry(conference)
-                        )
-                    }
-                </RecentListContainer>
-            </RecentListWrapper>
+            <Card>
+                <CardTitle>{ t('recent.title') }</CardTitle>
+                { this.state.error && <Notice kind = 'error'>{ t(`reserve.errors.${this.state.error}`) }</Notice> }
+                { _recentList.map(conference => this._renderRecentListEntry(conference)) }
+            </Card>
         );
     }
 
     /**
-     * Creates a handler for navigating to a conference.
+     * Loads the room names of "My rooms". The list is local; it needs no
+     * request to the reserve service.
      *
-     * @param {Object} conference - Conference Details.
      * @returns {void}
      */
-    _onNavigateToConference(conference: IConference) {
-        return () => {
+    _loadMyRooms() {
+        roomsApi.list().then(r => r.ok && this.setState({ myRooms: r.value.rooms.map(room => room.room) }));
+    }
+
+    /**
+     * Tells if a recent meeting is a room in "My rooms".
+     *
+     * @param {IConference} conference - Conference.
+     * @returns {boolean}
+     */
+    _isMyRoom(conference: IConference) {
+        return this.state.myRooms.includes(conference.room)
+            && sameServer(conference.serverURL, config.defaultServerURL);
+    }
+
+    /**
+     * Joins a recent meeting. A room in "My rooms" opens as host.
+     *
+     * @param {IConference} conference - Conference.
+     * @returns {Promise<void>}
+     */
+    async _onJoin(conference: IConference) {
+        if (!this._isMyRoom(conference)) {
             this.props.dispatch(addRecentListEntry(conference));
             window.jitsiElectronApp.ipc.send('open-meeting-window', conference);
-        };
+
+            return;
+        }
+        this.setState({ busy: true, error: undefined });
+        const result = await roomsApi.join(conference.room);
+
+        this.setState({ busy: false });
+        if (result.ok) {
+            window.jitsiElectronApp.ipc.send('open-meeting-window', result.value);
+        } else if (result.reason !== 'aborted') {
+            this.setState({ error: result.reason });
+        }
     }
 
     /**
-     * Creates a handler for removing a conference from the recents list.
+     * Renders one recent meeting.
      *
-     * @param {Object} conference - Conference Details.
-     * @returns {void}
-     */
-    _onRemoveConference(conference: IConference) {
-        return (e: React.MouseEvent) => {
-            this.props.dispatch(removeRecentListEntry(conference));
-            e.stopPropagation();
-        };
-    }
-
-
-    /**
-     * Renders the conference card.
-     *
-     * @param {Object} conference - Conference Details.
+     * @param {IConference} conference - Conference.
      * @returns {ReactElement}
      */
     _renderRecentListEntry(conference: IConference) {
+        const { t } = this.props;
+        const host = this._isMyRoom(conference);
+        const other = !sameServer(conference.serverURL, config.defaultServerURL);
+        const time = this._renderStartTime(conference);
+
         return (
-            <ConferenceCard
-                key = { conference.startTime }
-                onClick = { this._onNavigateToConference(conference) }>
-                <ConferenceTitle>
-                    {conference.room}
-                </ConferenceTitle>
-                <TruncatedText>
-                    {this._renderServerURL(conference.serverURL)}
-                </TruncatedText>
-                <TruncatedText>
-                    {this._renderStartTime(conference)}
-                </TruncatedText>
-                <Button
-                    appearance = 'subtle'
-                    iconBefore = { <CrossIcon primaryColor = 'white' /> }
-                    onClick = { this._onRemoveConference(conference) }
-                    spacing = 'none' />
-            </ConferenceCard>
+            <Row key = { `${conference.serverURL}/${conference.room}/${conference.startTime}` }>
+                <Text>
+                    <Name>
+                        <span title = { conference.room }>{ conference.room }</span>
+                        { host && <Badge $role = 'host'>{ t('reserve.roles.host') }</Badge> }
+                    </Name>
+                    <Muted>
+                        { [ other && serverHost(conference.serverURL), time && t('recent.lastJoined', { time }) ]
+                            .filter(Boolean)
+                            .join(' · ') }
+                    </Muted>
+                </Text>
+                <SmallButton
+                    disabled = { this.state.busy }
+                    onClick = { () => this._onJoin(conference) }
+                    primary = { host }>
+                    { host ? t('reserve.joinAsHost') : t('welcome.join') }
+                </SmallButton>
+                <RemoveButton
+                    aria-label = { t('recent.remove', { room: conference.room }) }
+                    onClick = { () => this.props.dispatch(removeRecentListEntry(conference)) }
+                    title = { t('recent.remove', { room: conference.room }) }
+                    type = 'button'>
+                    <CrossIcon size = { 20 } />
+                </RemoveButton>
+            </Row>
         );
     }
 
     /**
-     * Returns formatted Server URL.
-     *
-     * @param {string} serverURL - Server URL.
-     * @returns {string} - Formatted server URL.
-     */
-    _renderServerURL(serverURL?: string) {
-        if (!serverURL) {
-            return '';
-        }
-
-        // Strip protocol to make it cleaner.
-        return `${serverURL.replace('https://', '')}`;
-    }
-
-    /**
-     * Returns the Date/Time of the conference in string format.
+     * Returns the date and time of the conference as text.
      *
      * @param {Object} conference - Conference Details.
-     * @returns {string} - Date/Time and Duration.
+     * @returns {string}
      */
     _renderStartTime(conference: IConference) {
         const { startTime } = conference;
@@ -135,24 +220,22 @@ class RecentList extends Component<IProps> {
             return '';
         }
 
-        return new Intl.DateTimeFormat(navigator.language, {
+        return new Intl.DateTimeFormat(this.props.i18n.language || navigator.language, {
             dateStyle: 'medium',
             timeStyle: 'short'
         }).format(startTime);
     }
-
 }
 
 /**
  * Maps (parts of) the redux state to the React props.
  *
  * @param {Object} state - The redux state.
- * @returns {{
- *     _recentList: Array<RecentListItem>
- * }}
+ * @returns {Object}
  */
 function _mapStateToProps(state: IState) {
     return {
+        _drawerOpen: state.navbar.openDrawer === MyRoomsDrawer,
         _recentList: state.recentList.recentList
     };
 }

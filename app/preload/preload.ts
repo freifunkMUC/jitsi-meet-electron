@@ -1,6 +1,9 @@
 import { install as installJitsiElectronSdk } from '@jitsi/electron-sdk/preload';
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 
+import { RESERVE_EVENTS, RESERVE_INVOKE_CHANNELS } from '../features/reserve/types';
+import { SET_THEME_CHANNEL } from '../features/settings/theme';
+
 // Expose the SDK's own bridge (window.jitsiElectronSDK, an SDK-internal detail
 // the renderer helpers read) before wiring up our own bridge below.
 installJitsiElectronSdk();
@@ -12,8 +15,12 @@ const whitelistedIpcChannels = [
     'open-meeting-window',
     'close-meeting-window',
     'navigate-to-conference',
-    'set-default-server'
+    'set-default-server',
+    SET_THEME_CHANNEL,
+    ...Object.values(RESERVE_EVENTS)
 ];
+
+const whitelistedInvokeChannels: string[] = Object.values(RESERVE_INVOKE_CHANNELS);
 
 ipcRenderer.setMaxListeners(0);
 
@@ -50,6 +57,13 @@ contextBridge.exposeInMainWorld('jitsiElectronApp', {
             ipcRenderer.addListener(channel, cb);
 
             return remove;
+        },
+        invoke: (channel: string, ...args: any[]) => {
+            if (!whitelistedInvokeChannels.includes(channel)) {
+                return Promise.reject(new Error(`IPC channel not allowed: ${channel}`));
+            }
+
+            return ipcRenderer.invoke(channel, ...args);
         },
         send: (channel: string, ...args: any[]) => {
             if (!whitelistedIpcChannels.includes(channel)) {

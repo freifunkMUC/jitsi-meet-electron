@@ -22,22 +22,23 @@ const getDropMenuDisplay = (props: { isOpen?: boolean; }) => {
 };
 
 const DropMenu = styled.ul<{ isOpen?: boolean; }>`
-    background: #2c333d;
-    border-radius: 4px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
     bottom: 0;
     display: ${getDropMenuDisplay};
     left: 100%;
     list-style: none;
     margin: 0;
     min-width: 180px;
-    padding: 4px 0;
+    padding: 6px 0;
     position: absolute;
     z-index: 500;
 `;
 
 const GroupHeading = styled.li`
-    color: #8993a4;
+    color: var(--muted);
     font-size: 11px;
     font-weight: 600;
     padding: 8px 12px 4px;
@@ -45,13 +46,13 @@ const GroupHeading = styled.li`
 `;
 
 const MenuItem = styled.li`
-    color: #f4f5f7;
+    color: var(--text);
     cursor: pointer;
     font-size: 14px;
     padding: 8px 12px;
 
     &:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--hover);
     }
 `;
 
@@ -175,7 +176,6 @@ class HelpButton extends Component<IProps, IHelpButtonState> {
         return (
             <Wrapper ref = { this._setWrapperRef as any }>
                 <QuestionCircleIcon
-                    color = 'white'
                     onClick = { this._onIconClick }
                     size = { 24 } />
                 <DropMenu isOpen = { this.state.droplistOpen }>

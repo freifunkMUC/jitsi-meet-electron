@@ -22,10 +22,10 @@ const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
 
 const getTrackBackground = (props: { checked?: boolean; }) => {
     if (props.checked) {
-        return '#87ceeb';
+        return 'var(--accent)';
     }
 
-    return '#6b778c';
+    return 'var(--muted)';
 };
 
 const getKnobLeft = (props: { checked?: boolean; }) => {

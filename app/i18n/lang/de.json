@@ -16,12 +16,178 @@
 		"invalidServerTimeout": "Ungültiger Wert für die Server-Wartezeit",
 		"serverUrl": "Server-Adresse",
 		"serverTimeout": "Server-Wartezeit (in Sekunden)",
-		"disableAGC": "Automatische Mikrofonlautstärkeregelung deaktivieren"
+		"disableAGC": "Automatische Mikrofonlautstärkeregelung deaktivieren",
+		"theme": {
+			"label": "Design",
+			"system": "System",
+			"light": "Hell",
+			"dark": "Dunkel",
+			"systemHint": "Folgt dem hellen oder dunklen Modus deines Computers."
+		}
 	},
 	"remoteControl": {
 		"message": "Fernsteuerung dieses Computers zulassen?",
 		"detail": "Ein Konferenzteilnehmer möchte Maus und Tastatur dieses Computers steuern.",
 		"allow": "Zulassen",
 		"deny": "Ablehnen"
+	},
+	"reserve": {
+		"joining": "Verbinde…",
+		"joinFailed": "Beitritt zum reservierten Raum nicht möglich.",
+		"errors": {
+			"aborted": "Der Vorgang wurde abgebrochen.",
+			"deleted": "Der Raum wurde gelöscht.",
+			"expired": "Die Raumreservierung ist abgelaufen.",
+			"forbidden": "Mit diesem Link ist diese Rolle nicht erlaubt.",
+			"internal": "Der Server hat ein Problem. Versuche es später erneut.",
+			"invalid": "Der Link ist ungültig.",
+			"malformed": "Die Anfrage ist ungültig.",
+			"network": "Keine Verbindung zum Server. Prüfe deine Netzwerkverbindung.",
+			"not_supported": "Der Server unterstützt diesen Vorgang nicht.",
+			"pow": "Die Sicherheitsprüfung ist fehlgeschlagen. Versuche es erneut.",
+			"replaced": "Dieser Link wurde durch neue Links ersetzt. Frage die Person, die den Raum verwaltet, nach dem neuen Link.",
+			"too_many_requests": "Zu viele Anfragen. Warte einige Minuten und versuche es erneut.",
+			"unknown": "Der Raum ist unbekannt oder der Link ist kein Host-Link."
+		},
+		"myRooms": "Meine Räume",
+		"refresh": "Aktualisieren",
+		"notPersistent": "Dieser Computer kann gespeicherte Daten nicht verschlüsseln. Deine Räume bleiben nur bis zum Schließen der App erhalten. Bewahre die Verwaltungslinks sicher auf.",
+		"create": "Neuer Raum",
+		"createButton": "Reservieren",
+		"working": "Sicherheitsprüfung läuft. Das kann einige Sekunden dauern.",
+		"import": "Raum hinzufügen",
+		"importPlaceholder": "Verwaltungslink oder Host-Link einfügen",
+		"importButton": "Hinzufügen",
+		"empty": "Du hast noch keine Räume.",
+		"created": "Raum {{room}} ist reserviert.",
+		"imported": "Raum {{room}} wurde hinzugefügt.",
+		"copied": "In die Zwischenablage kopiert.",
+		"extended": "Der Raum wurde verlängert.",
+		"rotated": "Neue Links sind bereit. Die alten Links funktionieren nicht mehr.",
+		"status": {
+			"active": "Aktiv",
+			"deleted": "Gelöscht",
+			"expired": "Abgelaufen",
+			"replaced": "Links ersetzt",
+			"unknown": "Unbekannt"
+		},
+		"expires": "Läuft ab am {{date}}",
+		"expired": "Abgelaufen am {{date}}",
+		"joinAsHost": "Als Host beitreten",
+		"extend": "Verlängern",
+		"extendUntil": "{{duration}} (bis {{date}})",
+		"duration": {
+			"label": "Dauer",
+			"hours": "{{count}} Stunde",
+			"hours_plural": "{{count}} Stunden",
+			"days": "{{count}} Tag",
+			"days_plural": "{{count}} Tage",
+			"weeks": "{{count}} Woche",
+			"weeks_plural": "{{count}} Wochen",
+			"years": "{{count}} Jahr",
+			"years_plural": "{{count}} Jahre"
+		},
+		"copy": "Kopieren:",
+		"copyHint": {
+			"host": "Host-Link: mit Moderationsrechten beitreten",
+			"speaker": "Sprecher-Link: beitreten und sprechen",
+			"viewer": "Zuschauer-Link: nur zusehen",
+			"manage": "Verwaltungslink: Raum verlängern, erneuern oder löschen. Halte ihn geheim.",
+			"all": "Alle Links als Text"
+		},
+		"links": {
+			"host": "Host-Link",
+			"speaker": "Sprecher",
+			"viewer": "Zuschauer",
+			"manage": "Verwaltungslink",
+			"all": "Alle Links"
+		},
+		"copyAllHeader": "Raum {{room}}",
+		"rotate": "Neue Links",
+		"delete": "Löschen",
+		"remove": "Aus Liste entfernen",
+		"removeHint": "Entfernt den Raum nur aus dieser Liste. Der Raum bleibt reserviert.",
+		"confirm": {
+			"cancel": "Abbrechen",
+			"rotate": {
+				"message": "Neue Links für {{room}} erstellen?",
+				"detail": "Die alten Host-, Sprecher- und Verwaltungslinks funktionieren dann nicht mehr. Sende die neuen Links an die Teilnehmenden.",
+				"ok": "Neue Links erstellen"
+			},
+			"delete": {
+				"message": "Raum {{room}} löschen?",
+				"detail": "Der Raum und alle Links funktionieren dann nicht mehr. Das kann nicht rückgängig gemacht werden.",
+				"ok": "Löschen"
+			}
+		},
+		"reminder": {
+			"title": "Raum {{room}} läuft bald ab",
+			"body": "Der Raum läuft in {{count}} Tag ab, am {{date}}. Klicke hier, um ihn zu verlängern.",
+			"body_plural": "Der Raum läuft in {{count}} Tagen ab, am {{date}}. Klicke hier, um ihn zu verlängern."
+		},
+		"intro": "Ein eigener Raum mit festen Links. Drei Zugangsstufen: Moderation, Sprecher und Zuschauer. Ohne Konto.",
+		"howItWorks": "So funktioniert es",
+		"roles": {
+			"host": "Moderation",
+			"speaker": "Sprecher",
+			"viewer": "Zuschauer"
+		},
+		"roleHints": {
+			"host": "Für dich und Co-Moderatoren. Wer diesen Link hat, moderiert den Raum.",
+			"speaker": "Für Leute, die direkt mitreden sollen, ohne Moderationsrechte.",
+			"viewer": "Zum Teilen mit allen anderen."
+		},
+		"actions": {
+			"extend": "Verlängern",
+			"rotate": "Neue Links",
+			"delete": "Löschen"
+		},
+		"actionHints": {
+			"extend": "Behalte den Raum länger. Die Links bleiben gleich.",
+			"rotate": "Erzeugt neue Moderations- und Sprecher-Links. Die alten funktionieren nicht mehr. Der Zuschauer-Link bleibt.",
+			"delete": "Schließt den Raum für alle. Alle Links funktionieren nicht mehr."
+		},
+		"emptyCreate": "Raum reservieren",
+		"emptyImport": "Einen vorhandenen Raum hinzufügen",
+		"createHint": "Wähle, wie lange du den Raum brauchst. Du kannst ihn später verlängern.",
+		"importHint": "Füge den Verwaltungs- oder Moderations-Link eines Raums ein, den du schon reserviert hast.",
+		"share": {
+			"speaker": "Sprecher-Link teilen",
+			"viewer": "Zuschauer-Link teilen"
+		},
+		"cardTitle": "Reservierte Räume",
+		"cardIntro": "Dein eigener Raum mit festen Links. Moderations-, Sprecher- und Zuschauer-Links. Ohne Konto.",
+		"showAll": "Alle anzeigen ({{count}})",
+		"myRoomsHint": "Meine Räume: Räume reservieren, teilen und verwalten"
+	},
+	"welcome": {
+		"title": "An einer Konferenz teilnehmen",
+		"placeholder": "Raumname oder Link",
+		"helper": "Gib einen Raumnamen ein oder füge einen beliebigen {{server}}-Link ein. Moderations-, Sprecher- und Zuschauer-Links funktionieren.",
+		"join": "Beitreten",
+		"startNew": "Neue Konferenz starten",
+		"joinAs": {
+			"host": "Als Moderation beitreten",
+			"speaker": "Als Sprecher beitreten",
+			"viewer": "Als Zuschauer beitreten"
+		},
+		"checking": "Link wird geprüft…",
+		"room": "Raum {{room}}",
+		"saveToMyRooms": "In Meine Räume speichern",
+		"inMyRooms": "Dieser Raum ist in Meine Räume.",
+		"linkErrors": {
+			"expired": "Dieser Raum ist abgelaufen. Frag die Person, der der Raum gehört, nach einem neuen Link.",
+			"deleted": "Der Raum wurde gelöscht. Der Link funktioniert nicht mehr.",
+			"replaced": "Dieser Link wurde durch einen neuen Link ersetzt. Frag die Person, der der Raum gehört, nach dem neuen Link.",
+			"unknown": "Dieser Link öffnet keinen Raum. Prüfe, ob du den ganzen Link kopiert hast.",
+			"invalid": "Dieser Link öffnet keinen Raum. Prüfe, ob du den ganzen Link kopiert hast.",
+			"forbidden": "Mit diesem Link kannst du nicht in dieser Rolle beitreten."
+		},
+		"onServer": "Auf {{server}}"
+	},
+	"recent": {
+		"title": "Letzte Konferenzen",
+		"lastJoined": "Zuletzt am {{time}}",
+		"remove": "{{room}} aus der Liste entfernen"
 	}
 }

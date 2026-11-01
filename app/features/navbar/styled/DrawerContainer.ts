@@ -2,5 +2,8 @@
 import styled from 'styled-components';
 
 export default styled.div`
-    padding: 0 0.8em;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 16px 24px;
 `;

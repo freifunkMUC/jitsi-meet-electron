@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import type { IState } from '../../../types';
+import { MyRoomsButton, MyRoomsDrawer } from '../../reserve/components';
 import { SettingsButton, SettingsDrawer } from '../../settings';
 
 import HelpButton from './HelpButton';
@@ -11,12 +12,13 @@ import Logo from './Logo';
 
 
 const NavBar = styled.nav`
-    background: #1a1a1a;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--line);
     display: flex;
     flex-direction: column;
     height: 100vh;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 12px 0;
     width: 64px;
 `;
 
@@ -24,25 +26,26 @@ const NavSection = styled.div`
     align-items: center;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 `;
 
 const NavItem = styled.div`
     align-items: center;
-    border-radius: 8px;
-    color: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-sm);
+    color: var(--icon);
     cursor: pointer;
     display: flex;
     justify-content: center;
     padding: 8px;
 
     &:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
+        background: var(--hover);
+        color: var(--accent-text);
     }
 `;
 
 interface IProps {
+    _isMyRoomsDrawerOpen?: boolean;
     _isSettingsDrawerOpen?: boolean;
 }
 
@@ -65,6 +68,9 @@ class Navbar extends Component<IProps> {
                             <Logo />
                         </NavItem>
                         <NavItem>
+                            <MyRoomsButton />
+                        </NavItem>
+                        <NavItem>
                             <SettingsButton />
                         </NavItem>
                     </NavSection>
@@ -75,6 +81,7 @@ class Navbar extends Component<IProps> {
                     </NavSection>
                 </NavBar>
                 <SettingsDrawer isOpen = { this.props._isSettingsDrawerOpen } />
+                <MyRoomsDrawer isOpen = { this.props._isMyRoomsDrawerOpen } />
             </>
         );
     }
@@ -85,11 +92,13 @@ class Navbar extends Component<IProps> {
  *
  * @param {Object} state - The redux state.
  * @returns {{
+ *     _isMyRoomsDrawerOpen,
  *     _isSettingsDrawerOpen
  * }}
  */
 function _mapStateToProps(state: IState) {
     return {
+        _isMyRoomsDrawerOpen: state.navbar.openDrawer === MyRoomsDrawer,
         _isSettingsDrawerOpen: state.navbar.openDrawer === SettingsDrawer
     };
 }

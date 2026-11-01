@@ -1,0 +1,129 @@
+/*
+ * FreifunkMeet theme. Colours follow https://meet.ffmuc.net/reserve.
+ *
+ * The light theme is the default. The dark theme applies when the colour
+ * scheme is dark. In Electron the colour scheme follows nativeTheme.themeSource,
+ * so the "Theme" setting (system, light, dark) and live OS changes both work
+ * without JavaScript here.
+ */
+
+:root {
+    color-scheme: light;
+
+    --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    --radius: 18px;
+    --radius-sm: 12px;
+
+    --bg: #f3f4f7;
+    --bg-elev: #ffffff;
+    --card: #ffffff;
+    --line: rgba(16, 24, 40, 0.12);
+    --text: #1a1d23;
+    --muted: #555e6b;
+    --icon: #3b4350;
+    --hover: rgba(16, 24, 40, 0.06);
+    --input-bg: #ffffff;
+    --input-line: rgba(16, 24, 40, 0.22);
+    --card-line: rgba(16, 24, 40, 0.08);
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.08);
+    --drawer-shadow: 1px 0 0 rgba(16, 24, 40, 0.08), 4px 0 16px rgba(16, 24, 40, 0.08);
+    --focus-ring: #b0004f;
+
+    --accent: #dc0067;
+    --accent-text: #b0004f;
+    --accent-grad: linear-gradient(135deg, #c4005b, #dc0067);
+    --accent-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+    --sun: #f5c400;
+
+    --btn-bg: rgba(16, 24, 40, 0.06);
+    --btn-bg-hover: rgba(16, 24, 40, 0.11);
+    --btn-text: #1a1d23;
+    --danger-btn-bg: #fde8e8;
+    --danger-btn-text: #a3161b;
+
+    --ok: #0f7b4f;
+    --warn: #8a5300;
+    --danger: #b42318;
+
+    --badge-host-bg: rgba(220, 0, 103, 0.12);
+    --badge-host-text: #a8004b;
+    --badge-speaker-bg: rgba(245, 196, 0, 0.28);
+    --badge-speaker-text: #6b5000;
+    --badge-viewer-bg: rgba(16, 24, 40, 0.08);
+    --badge-viewer-text: #3b4350;
+
+    --notice-error-bg: #fdecec;
+    --notice-error-line: #f3b4b4;
+    --notice-error-text: #8f1d1d;
+    --notice-info-bg: #edf3ff;
+    --notice-info-line: #bcd2ff;
+    --notice-info-text: #1d3f91;
+    --notice-warn-bg: #fff5e3;
+    --notice-warn-line: #f2d39a;
+    --notice-warn-text: #744600;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --bg: #16181d;
+        --bg-elev: #1b1e24;
+        --card: rgba(34, 40, 49, 0.9);
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #eef0f3;
+        --muted: #9ba3ae;
+        --icon: rgba(238, 240, 243, 0.8);
+        --hover: rgba(255, 255, 255, 0.08);
+        --input-bg: rgba(0, 0, 0, 0.3);
+        --input-line: rgba(255, 255, 255, 0.12);
+        --card-line: rgba(255, 255, 255, 0.08);
+        --shadow: 0 20px 50px -30px rgba(0, 0, 0, 0.8);
+        --drawer-shadow: 8px 0 30px -12px rgba(0, 0, 0, 0.45);
+        --focus-ring: #ff8fbd;
+
+        --accent-text: #ff8fbd;
+        --accent-grad: linear-gradient(135deg, #dc0067, #ff4d94);
+        --accent-shadow: 0 12px 30px -10px rgba(220, 0, 103, 0.8);
+
+        --btn-bg: rgba(255, 255, 255, 0.06);
+        --btn-bg-hover: rgba(255, 255, 255, 0.12);
+        --btn-text: #eef0f3;
+        --danger-btn-bg: rgba(255, 80, 80, 0.14);
+        --danger-btn-text: #ffb3b3;
+
+        --ok: #2fd18a;
+        --warn: #ffb547;
+        --danger: #ff8f8f;
+
+        --badge-host-bg: rgba(220, 0, 103, 0.2);
+        --badge-host-text: #ff8fbd;
+        --badge-speaker-bg: rgba(245, 196, 0, 0.16);
+        --badge-speaker-text: #ffd84d;
+        --badge-viewer-bg: rgba(255, 255, 255, 0.1);
+        --badge-viewer-text: #d6dae0;
+
+        --notice-error-bg: rgba(255, 80, 80, 0.1);
+        --notice-error-line: rgba(255, 80, 80, 0.25);
+        --notice-error-text: #ffb3b3;
+        --notice-info-bg: rgba(120, 170, 255, 0.08);
+        --notice-info-line: rgba(120, 170, 255, 0.2);
+        --notice-info-text: #c6dcff;
+        --notice-warn-bg: rgba(255, 181, 71, 0.08);
+        --notice-warn-line: rgba(255, 181, 71, 0.22);
+        --notice-warn-text: #ffd79a;
+    }
+}
+
+html,
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+}
+
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}

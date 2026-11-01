@@ -68,8 +68,10 @@ function _insertConference(
         recentList: IConference[],
         newConference: IConference
 ) {
+    // Never persist a token.
+    const { jwt: _jwt, ...withoutToken } = newConference;
     const conferenceToStore: IConference = {
-        ...newConference,
+        ...withoutToken,
         room: _cleanRoomName(newConference.room),
         startTime: Date.now()
     };

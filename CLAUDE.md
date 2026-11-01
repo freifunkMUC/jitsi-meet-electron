@@ -24,6 +24,7 @@ Jitsi Meet Electron is a desktop application for Jitsi Meet built with Electron.
 ### Building
 - **Lint code**: `npm run lint` (ESLint over `.js`, `.ts`, `.tsx`)
 - **Fix lint issues**: `npm run lint-fix`
+- **Unit tests**: `npm test` (node:test via tsx over `app/**/*.test.ts`)
 - **Type-check**: `npm run type-check` (`tsc --noEmit`; esbuild itself does not type-check)
 - **Build for production**: `npm run build` (runs `type-check` then esbuild for the main, preload, and renderer bundles)
 - **Create distribution**: `npm run dist` (runs build then electron-builder)
@@ -104,6 +105,8 @@ app/features/
 ├── navbar/       - Navigation bar with settings and help
 ├── onboarding/   - User onboarding flow with spotlight
 ├── recent-list/  - Recent conference history
+├── reserve/      - Reserved rooms (meet-reserve): framework-free client in `client/`,
+│                   main-process IPC, encrypted store and reminders in `main/`, My rooms UI
 ├── redux/        - Redux store, middleware, and root reducer
 ├── router/       - React Router integration with Redux
 ├── settings/     - Settings drawer with server URL, toggles, timeout
@@ -155,9 +158,10 @@ Implemented in `main.ts`:
   identity — only a main-process prompt cannot be rendered or dismissed by web content
 
 ### Protocol Handling
-Supports `jitsi-meet://` protocol for deeplinks:
+Supports the `ffmuc-meet://` and `jitsi-meet://` protocols for deeplinks (`config.appProtocolPrefixes`):
 - `jitsi-meet://myroom` - Opens room on default server
 - `jitsi-meet://jitsi.example.com/myroom` - Opens room on specific server
+- `ffmuc-meet://meet.ffmuc.net/reserve/h/<secret>` - Reserve link; resolved in main via the join API
 - Handled via `handleProtocolCall()` in main process
 - Single instance enforcement (except macOS via `LSMultipleInstancesProhibited`)
 
@@ -232,7 +236,7 @@ Documented in README.md Publishing section:
 ## Important Flags and Constants
 
 - `config.defaultServerURL`: Default Jitsi Meet server (meet.jit.si)
-- `config.appProtocolPrefix`: Protocol scheme (jitsi-meet)
+- `config.appProtocolPrefixes`: Protocol schemes (ffmuc-meet, jitsi-meet)
 - `config.defaultServerTimeout`: Loading timeout in seconds (30)
 
 ## Common Patterns

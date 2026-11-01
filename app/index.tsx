@@ -2,6 +2,7 @@
  * CSS reset imported first so it applies to all components.
  */
 import './styles/reset.css';
+import './styles/theme.css';
 
 import React, { Component, ComponentType, Suspense } from 'react';
 import { render } from 'react-dom';
