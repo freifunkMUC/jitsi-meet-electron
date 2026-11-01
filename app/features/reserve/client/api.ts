@@ -1,4 +1,5 @@
 import { ReserveError, mapError, mapGone } from './errors';
+import type { JoinCache } from './joinCache';
 import { IReserveLink, hostSecretFromManageURL, joinLink } from './links';
 import { PowProgressFn, solvePow } from './pow';
 import { HashFn } from './sha256';
@@ -98,6 +99,11 @@ export interface IReserveClientOptions {
      * Faster native SHA-256, if the host has one.
      */
     hash?: HashFn;
+
+    /**
+     * In-memory token cache shared by {@code resolveJoin} calls.
+     */
+    joinCache?: JoinCache;
 }
 
 /**
@@ -135,6 +141,7 @@ export class ReserveClient {
     private _chunkSize?: number;
     private _fetch: FetchFn;
     private _hash?: HashFn;
+    private _joinCache?: JoinCache;
 
     /**
      * Initializes a new {@code ReserveClient}.
@@ -146,6 +153,7 @@ export class ReserveClient {
         this._chunkSize = options.chunkSize;
         this._fetch = options.fetch ?? ((url, init) => (globalThis as any).fetch(url, init));
         this._hash = options.hash;
+        this._joinCache = options.joinCache;
     }
 
     /**
@@ -288,7 +296,8 @@ export class ReserveClient {
 
     /**
      * Resolves any reserve link to join info. Uses the join API and falls back
-     * to the short link redirect on servers without it.
+     * to the short link redirect on servers without it. Reuses a cached token
+     * when the client has a join cache.
      *
      * @param {IReserveLink} link - Parsed link.
      * @returns {Promise<IJoinInfo>}
@@ -296,6 +305,12 @@ export class ReserveClient {
     async resolveJoin(link: IReserveLink): Promise<IJoinInfo> {
         let key = link.key;
         const role: JoinRole = link.kind === 'speaker' ? 'speaker' : 'host';
+        const cache = this._joinCache;
+        const cached = cache?.get(key, role);
+
+        if (cached) {
+            return cached;
+        }
 
         if (link.legacy) {
             const view = await this.manage(key);
@@ -307,14 +322,20 @@ export class ReserveClient {
             key = secret;
         }
 
+        let info: IJoinInfo;
+
         try {
-            return await this.join(key, role);
+            info = await this.join(key, role);
         } catch (e) {
-            if (e instanceof ReserveError && e.reason === 'not_supported') {
-                return this.joinViaRedirect(key, role);
+            if (!(e instanceof ReserveError && e.reason === 'not_supported')) {
+                throw e;
             }
-            throw e;
+            info = await this.joinViaRedirect(key, role);
         }
+
+        cache?.set(link.key, info);
+
+        return info;
     }
 
     /**

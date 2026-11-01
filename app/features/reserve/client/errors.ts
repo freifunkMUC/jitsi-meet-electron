@@ -5,6 +5,7 @@ export type ReserveErrorReason
     = 'aborted'
     | 'deleted'
     | 'expired'
+    | 'forbidden'
     | 'internal'
     | 'invalid'
     | 'malformed'
@@ -40,7 +41,7 @@ export class ReserveError extends Error {
 const POW_REASONS = [ 'bad_mac', 'insufficient', 'replay' ];
 
 const KNOWN_REASONS: ReserveErrorReason[] = [
-    'deleted', 'expired', 'internal', 'invalid', 'malformed', 'replaced', 'too_many_requests', 'unknown'
+    'deleted', 'expired', 'forbidden', 'internal', 'invalid', 'malformed', 'replaced', 'too_many_requests', 'unknown'
 ];
 
 const MESSAGE_REASONS: Array<[ string, ReserveErrorReason ]> = [
